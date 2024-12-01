@@ -25,7 +25,7 @@ $inventory->checkLogin();
                 <div class="card-body">
 					<div class="row">
 						<div class="col-sm-12">
-							<table id="getRevenueData" class="table table-bordered table-striped">
+							<table id="getRevenue" class="table table-bordered table-striped">
 								<thead>
 									<tr>
                                         <th>#</th>
