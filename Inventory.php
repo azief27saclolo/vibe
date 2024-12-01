@@ -765,5 +765,34 @@ class Inventory {
 		);
 		echo json_encode($output);		
 	}
+	
+	
+	// REplaced 
+	public function phoneDropdownList(){	
+		$sqlQuery = "SELECT * FROM ".$this->productTable. " as p 
+							JOIN ".$this->categoryTable ." as c ON c.categoryid = p.categoryid
+							Where c.name = 'Phone'
+							ORDER BY pname ASC";
+		$result = mysqli_query($this->dbConnect, $sqlQuery);
+		$dropdownHTML = '';
+		while( $product = mysqli_fetch_assoc($result) ) {	
+			$dropdownHTML .= '<option value="'.$product["pid"].'">'.$product["pname"].'</option>';
+		}
+		return $dropdownHTML;
+	}
+	
+	public function partsDropdownList(){	
+		$sqlQuery = "SELECT * FROM ".$this->productTable. " as p 
+							JOIN ".$this->categoryTable ." as c ON c.categoryid = p.categoryid
+							Where c.name = 'Parts'
+							ORDER BY pname ASC";
+		$result = mysqli_query($this->dbConnect, $sqlQuery);
+		$dropdownHTML = '';
+		while( $product = mysqli_fetch_assoc($result) ) {	
+			$dropdownHTML .= '<option value="'.$product["pid"].'">'.$product["pname"].'</option>';
+		}
+		return $dropdownHTML;
+	}
+	
 }
 ?>

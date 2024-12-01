@@ -12,6 +12,7 @@
 			<li class="nav-item"><a class="nav-link" href="brand.php"><i class="fas fa-tag"></i> Brand</a></li>
 			<li class="nav-item"><a class="nav-link" href="supplier.php"><i class="fas fa-truck"></i> Supplier</a></li>
 			<li class="nav-item"><a class="nav-link" href="product.php"><i class="fas fa-cogs"></i> Product</a></li>
+			<li class="nav-item"><a class="nav-link" href="replaced.php"><i class="fas fa-cogs"></i> Replaced</a></li>
 			<li class="nav-item"><a class="nav-link" href="purchase.php"><i class="fas fa-cart-plus"></i> Purchase</a></li>
 			<li class="nav-item"><a class="nav-link" href="order.php"><i class="fas fa-box"></i> Orders</a></li>
 		</ul>
