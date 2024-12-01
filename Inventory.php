@@ -87,9 +87,10 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$customerData = array();	
+		$increment = 1;
 		while( $customer = mysqli_fetch_assoc($result) ) {		
 			$customerRows = array();
-			$customerRows[] = $customer['id'];
+			$customerRows[] = $increment++;
 			$customerRows[] = $customer['name'];
 			$customerRows[] = $customer['address'];			
 			$customerRows[] = $customer['mobile'];	
@@ -148,6 +149,7 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$categoryData = array();	
+		$increment = 1;
 		while( $category = mysqli_fetch_assoc($result) ) {		
 			$categoryRows = array();
 			$status = '';
@@ -156,7 +158,7 @@ class Inventory {
 			} else {
 				$status = '<span class="label label-danger">Inactive</span>';
 			}
-			$categoryRows[] = $category['categoryid'];
+			$categoryRows[] = $increment++;
 			$categoryRows[] = $category['name'];
 			$categoryRows[] = $status;			
 			$categoryRows[] = '<button type="button" name="update" id="'.$category["categoryid"].'" class="btn btn-primary btn-sm rounded-0 update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$category["categoryid"].'" class="btn btn-danger btn-sm rounded-0 delete"  title="Delete"><i class="fa fa-trash"></i></button>';
@@ -221,6 +223,7 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$brandData = array();	
+		$increment = 1;
 		while( $brand = mysqli_fetch_assoc($result) ) {			
 			$status = '';
 			if($brand['status'] == 'active')	{
@@ -229,7 +232,7 @@ class Inventory {
 				$status = '<span class="label label-danger">Inactive</span>';
 			}
 			$brandRows = array();
-			$brandRows[] = $brand['id'];
+			$brandRows[] = $increment++;
 			$brandRows[] = $brand['bname'];
 			$brandRows[] = $brand['name'];
 			$brandRows[] = $status;
@@ -308,6 +311,7 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$productData = array();	
+		$increment = 1;
 		while( $product = mysqli_fetch_assoc($result) ) {			
 			$status = '';
 			if($product['status'] == 'active') {
@@ -316,7 +320,7 @@ class Inventory {
 				$status = '<span class="label label-danger">Inactive</span>';
 			}
 			$productRow = array();
-			$productRow[] = $product['pid'];
+			$productRow[] = $increment++;
 			$productRow[] = $product['name'];
 			$productRow[] = $product['bname'];
 			$productRow[] = $product['pname'];	
@@ -351,6 +355,7 @@ class Inventory {
 			WHERE status = 'active'	ORDER BY supplier_name ASC";
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$dropdownHTML = '';
+		$increment = 1;
 		while( $supplier = mysqli_fetch_assoc($result) ) {	
 			$dropdownHTML .= '<option value="'.$supplier["supplier_id"].'">'.$supplier["supplier_name"].'</option>';
 		}
@@ -385,11 +390,11 @@ class Inventory {
 	public function updateProduct() {		
 		if($_POST['pid']) {	
 			$sqlUpdate = "UPDATE ".$this->productTable." 
-				SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."', unit='".$_POST['unit']."', base_price='".$_POST['base_price']."', tax='".$_POST['tax']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
+				SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
 			mysqli_query($this->dbConnect, $sqlUpdate);	
 			echo 'Product Update';
 		}	
-	}	
+	}	 
 	public function deleteProduct(){
 		$sqlQuery = "
 			DELETE FROM ".$this->productTable." 
@@ -475,6 +480,7 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$supplierData = array();	
+		$increment = 1;
 		while( $supplier = mysqli_fetch_assoc($result) ) {	
 			$status = '';
 			if($supplier['status'] == 'active') {
@@ -483,7 +489,7 @@ class Inventory {
 				$status = '<span class="label label-danger">Inactive</span>';
 			}
 			$supplierRows = array();
-			$supplierRows[] = $supplier['supplier_id'];		
+			$supplierRows[] = $increment++;
 			$supplierRows[] = $supplier['supplier_name'];	
 			$supplierRows[] = $supplier['mobile'];			
 			$supplierRows[] = $supplier['address'];	
@@ -545,9 +551,10 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$purchaseData = array();	
+		$increment = 1;
 		while( $purchase = mysqli_fetch_assoc($result) ) {			
 			$productRow = array();
-			$productRow[] = $purchase['purchase_id'];
+			$productRow[] = $increment++;
 			$productRow[] = $purchase['pname'];
 			$productRow[] = $purchase['quantity'];			
 			$productRow[] = $purchase['supplier_name'];			
@@ -662,9 +669,10 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$orderData = array();	
+		$increment = 1;
 		while( $order = mysqli_fetch_assoc($result) ) {			
 			$orderRow = array();
-			$orderRow[] = $order['order_id'];
+			$orderRow[] = $increment++;
 			$orderRow[] = $order['pname'];
 			$orderRow[] = $order['total_shipped'];	
 			$orderRow[] = $order['name'];			

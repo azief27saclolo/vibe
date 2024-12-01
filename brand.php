@@ -34,8 +34,8 @@ $inventory->checkLogin();
                 		<thead>
 							<tr>
 								<th>ID</th>
-								<th>Category</th>
 								<th>Brand Name</th>
+								<th>Category</th>
 								<th>Status</th>
 								<th>Action</th>
 							</tr>
