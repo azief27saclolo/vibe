@@ -12,6 +12,9 @@ class Inventory {
 	private $supplierTable = 'ims_supplier';
 	private $purchaseTable = 'ims_purchase';
 	private $orderTable = 'ims_order';
+
+	private  $replacedTable = 'product_replacement_parts';
+
 	private $dbConnect = false;
     public function __construct(){
         if(!$this->dbConnect){ 
@@ -686,6 +689,7 @@ class Inventory {
 		mysqli_query($this->dbConnect, $sqlInsert);
 		echo 'New order added';
 	}		
+
 	public function getOrderDetails(){
 		$sqlQuery = "
 			SELECT * FROM ".$this->orderTable." 
@@ -794,5 +798,101 @@ class Inventory {
 		return $dropdownHTML;
 	}
 	
+	public function addReplaced() {
+		$sqlInsert = "
+			INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, 	quantity) 
+			VALUES ('".$_POST['phone']."', '".$_POST['part']."', '".$_POST['quantity']."')";		
+		mysqli_query($this->dbConnect, $sqlInsert);
+		echo 'New order added';
+	}
+	
+
+	
+	public function listReplaced() {
+		$sqlQuery = "SELECT rt.replacement_id, 
+							rt.phone_pid, 
+							rt.part_pid, 
+							rt.quantity, 
+							p1.pname AS phone_name, 
+							p2.pname AS part_name
+					 FROM ".$this->replacedTable." as rt
+					 INNER JOIN ".$this->productTable." as p1 ON p1.pid = rt.phone_pid
+					 INNER JOIN ".$this->productTable." as p2 ON p2.pid = rt.part_pid"; // Join for both phone and part
+		
+		// Apply ordering if set
+		if (isset($_POST['order'])) {
+			$sqlQuery .= ' ORDER BY ' . $_POST['order']['0']['column'] . ' ' . $_POST['order']['0']['dir'] . ' ';
+		} else {
+			$sqlQuery .= ' ORDER BY p1.pname DESC ';
+		}
+		
+		// Apply pagination if set
+		if ($_POST['length'] != -1) {
+			$sqlQuery .= 'LIMIT ' . $_POST['start'] . ', ' . $_POST['length'];
+		}
+		
+		$result = mysqli_query($this->dbConnect, $sqlQuery);
+		$numRows = mysqli_num_rows($result);
+		$replacedData = array();
+	
+		while ($purchase = mysqli_fetch_assoc($result)) {
+			// Format each row based on the fields in your table
+			$replacedRow = array();
+			$replacedRow[] = $purchase['replacement_id']; // Replacement ID
+			$replacedRow[] = $purchase['phone_name'];    // Phone name
+			$replacedRow[] = $purchase['part_name'];     // Part name
+			$replacedRow[] = $purchase['quantity'];      // Quantity of parts replaced
+			$replacedRow[] = '<div class="btn-group btn-group-sm">
+								 <button type="button" name="update" id="' . $purchase["replacement_id"] . '" 
+										 class="btn btn-primary btn-sm rounded-0 update" title="Update">
+									 <i class="fa fa-edit"></i>
+								 </button>
+								 <button type="button" name="delete" id="' . $purchase["replacement_id"] . '" 
+										 class="btn btn-danger btn-sm rounded-0 delete" title="Delete">
+									 <i class="fa fa-trash"></i>
+								 </button>
+							  </div>'; // Action buttons
+		
+			$replacedData[] = $replacedRow;
+		}
+	
+		// Output the data as a JSON response
+		$output = array(
+			"draw" => intval($_POST["draw"]),
+			"recordsTotal" => $numRows,
+			"recordsFiltered" => $numRows, // If filtering is applied, adjust accordingly
+			"data" => $replacedData
+		);
+	
+		echo json_encode($output); // Return the JSON response
+	}
+	
+	
+	public function deleteReplaced(){
+		$sqlQuery = "
+			DELETE FROM ".$this->replacedTable." 
+			WHERE replacement_id = '".$_POST["replaced_id"]."'";	
+		mysqli_query($this->dbConnect, $sqlQuery);			
+	}
+
+	public function getReplacedDetails(){
+		$sqlQuery = "
+			SELECT * FROM ".$this->replacedTable." 
+			WHERE replacement_id  = '".$_POST["replaced_id"]."'";
+		$result = mysqli_query($this->dbConnect, $sqlQuery);	
+		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+		echo json_encode($row);
+	}
+
+
+	public function updateReplaced() {
+		if($_POST['replacement_id']) {	
+			$sqlUpdate = "
+				UPDATE ".$this->replacedTable." 
+				SET phone_pid  = '".$_POST['phone']."', part_pid= '".$_POST['part']."' , quantity= '".$_POST['quantity']."'	WHERE replacement_id = '".$_POST['replacement_id']."'";		
+			mysqli_query($this->dbConnect, $sqlUpdate);	
+			echo 'Replaced Edited';
+		}	
+	}	
 }
 ?>

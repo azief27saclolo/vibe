@@ -32,7 +32,7 @@ $inventory->checkLogin();
                     </div>
                     <div class="card-body">
                         <div class="row"><div class="col-sm-12 table-responsive">
-                            <table id="replaceList" class="table table-bordered table-striped">
+                            <table id="replacedList" class="table table-bordered table-striped">
                                 <thead><tr>
                                     <th>ID</th>      
 									<th>Product Name</th>	
@@ -59,18 +59,19 @@ $inventory->checkLogin();
                             <form method="post" id="replacedForm">
                                 <input type="hidden" name="pid" id="pid" />
                                 <input type="hidden" name="btn_action" id="btn_action" />
+                                <input type="hidden" name="replacement_id" id="replacement_id" />
                                 
                                 <div class="mb-3">
                                     <label>PhoneName</label>
-                                    <select name="product" id="product" class="form-select rounded-0" required>
-                                        <option value="">Select Product</option>
+                                    <select name="phone" id="phone" class="form-select rounded-0" required>
+                                        <option value="">Select Phone</option>
                                         <?php echo $inventory->phoneDropdownList();?>
                                     </select>
                                 </div>
                                
                                 <div class="mb-3">
-                                    <label>Product Name</label>
-                                    <select name="product" id="product" class="form-select rounded-0" required>
+                                    <label>Part Name</label>
+                                    <select name="part" id="part" class="form-select rounded-0" required>
                                         <option value="">Select Product</option>
                                         <?php echo $inventory->partsDropdownList();?>
                                     </select>
@@ -78,7 +79,7 @@ $inventory->checkLogin();
 
                                 <div class="form-group">
                                     <label>Quantity</label>
-                                    <input type="number" name="base_price" id="base_price" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />
+                                    <input type="number" name="quantity" id="quantity" class="form-control rounded-0"  />
                                 </div>
 
                             </form>
@@ -92,5 +93,7 @@ $inventory->checkLogin();
             </div>
         </div>
 	
+
+        
 </div>	
 <?php include('inc/footer.php');?>
