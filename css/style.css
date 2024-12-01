@@ -1,7 +1,8 @@
 html,
 body {
-    height: 100% !important;
-    width: 100% !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
 }
 
 .footer {
@@ -14,15 +15,20 @@ body {
 }
 
 .navbar {
-    background: linear-gradient(to right, #1e3c72, #2a5298); /* Blue gradient */
+    background: linear-gradient(to right, #1e3c72, #2a5298);
     transition: all 0.3s ease-in-out;
+}
+.nav-link.active, .nav-link:focus, .nav-link:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
 }
 .navbar .nav-link {
     color: white !important;
     transition: color 0.3s ease;
 }
 .navbar .nav-link:hover {
-    color: #FFD700 !important; /* Gold on hover */
+    color: #FFD700 !important;
 }
 .dropdown-menu {
     background: #333;
@@ -44,4 +50,64 @@ body {
 }
 .dropdown-item:hover {
     background: #555;
+}
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+    background: #2c3e50;
+    color: white;
+    font-size: 1.2rem;
+    padding: 15px 20px;
+}
+.card-body {
+    background: #ecf0f1;
+    padding: 20px;
+}
+#inventoryDetails {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: 'Arial', sans-serif;
+}
+#inventoryDetails th, #inventoryDetails td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+#inventoryDetails th {
+    background: #34495e;
+    color: white;
+}
+#inventoryDetails tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+#inventoryDetails tr:hover {
+    background-color: #f1c40f;
+    color: white;
+}
+h3.card-title {
+    font-size: 1.5rem;
+}
+.table {
+    width: 100%;
+    table-layout: fixed;
+}
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+}
+.container {
+    background-color: #f4f6f8;
+    padding: 20px;
+}
+.card-header {
+    background-color: #34495e;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #ecf0f1;
+}
+.table-hover tbody tr:hover {
+    background-color: #f39c12;
 }

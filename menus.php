@@ -30,3 +30,14 @@
 		</ul>
 	</div>
 </nav>
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+    const links = document.querySelectorAll('.nav-link');
+    links.forEach(link => {
+        link.addEventListener('click', function () {
+            links.forEach(item => item.classList.remove('active')); // Remove active class from all
+            this.classList.add('active'); // Add active class to clicked item
+        });
+    });
+});
+</script>
