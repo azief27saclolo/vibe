@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    
     var purchaseData = $('#purchaseList').DataTable({
         "lengthChange": false,
         "processing": true,

@@ -133,3 +133,19 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteOrder'){
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'addReplaced'){
 	$inventory->addReplaced();
 }
+
+if(!empty($_POST['action']) && $_POST['action'] == 'listReplaced') {
+	$inventory->listReplaced();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteReplaced'){
+	$inventory->deleteReplaced();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getReplacedDetails'){
+	$inventory->getReplacedDetails();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateReplaced'){
+	$inventory->updateReplaced();
+}
