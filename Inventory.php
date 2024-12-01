@@ -377,9 +377,7 @@ class Inventory {
 			$output['model'] = $product['model'];
 			$output['description'] = $product['description'];
 			$output['quantity'] = $product['quantity'];
-			$output['unit'] = $product['unit'];
 			$output['base_price'] = $product['base_price'];
-			$output['tax'] = $product['tax'];
 			$output['supplier'] = $product['supplier'];
 		}
 		echo json_encode($output);
@@ -437,7 +435,7 @@ class Inventory {
 			</tr>			
 			<tr>
 				<td>Available Quantity</td>
-				<td>'.$product["quantity"].' '.$product["unit"].'</td>
+				<td>'.$product["quantity"].'</td>
 			</tr>
 			<tr>
 				<td>Base Price</td>
