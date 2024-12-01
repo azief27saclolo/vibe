@@ -90,33 +90,12 @@ $inventory->checkLogin();
                                 <div class="form-group">
                                     <label>Product Quantity</label>
                                     <div class="input-group">
-                                        <input type="text" name="quantity" id="quantity" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" /> 
-                                        <select name="unit" class="form-select rounded-0" id="unit" required>
-                                            <option value="">Select Unit</option>
-                                            <option value="Bags">Bags</option>
-                                            <option value="Bottles">Bottles</option>
-                                            <option value="Box">Box</option>
-                                            <option value="Dozens">Dozens</option>
-                                            <option value="Feet">Feet</option>
-                                            <option value="Gallon">Gallon</option>
-                                            <option value="Grams">Grams</option>
-                                            <option value="Inch">Inch</option>
-                                            <option value="Kg">Kg</option>
-                                            <option value="Liters">Liters</option>
-                                            <option value="Meter">Meter</option>
-                                            <option value="Nos">Nos</option>
-                                            <option value="Packet">Packet</option>
-                                            <option value="Rolls">Rolls</option>
-                                        </select>
+                                        <input type="text" name="quantity" id="quantity" class="form-control rounded-0"     " /> 
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Product Base Price</label>
-                                    <input type="text" name="base_price" id="base_price" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />
-                                </div>
-                                <div class="form-group">
-                                    <label>Product Tax (%)</label>
-                                    <input type="text" name="tax" id="tax" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />
+                                    <input type="number" name="base_price" id="base_price" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />
                                 </div>
                                 <div class="form-group">
                                     <label>Supplier</label>

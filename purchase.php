@@ -30,6 +30,7 @@ $inventory->checkLogin();
                             </div>
                         </div>
                     </div>
+
                     <div class="card-body">
                         <div class="row"><div class="col-sm-12 table-responsive">
                             <table id="purchaseList" class="table table-bordered table-striped">
@@ -43,6 +44,7 @@ $inventory->checkLogin();
                             </table>
                         </div></div>
                     </div>
+                    
                 </div>
 			</div>
 		</div>
@@ -68,7 +70,7 @@ $inventory->checkLogin();
                                 <div class="form-group">
                                     <label>Product Quantity</label>
                                     <div class="input-group">
-                                        <input type="text" name="quantity" id="quantity" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />        
+                                        <input type="number" name="quantity" id="quantity" class="form-control rounded-0" required  />        
                                     </div>
                                 </div>                           
                                 <div class="form-group">

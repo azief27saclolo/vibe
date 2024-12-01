@@ -355,8 +355,8 @@ class Inventory {
 	}
 	public function addProduct() {		
 		$sqlInsert = "
-			INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, unit, base_price, tax, minimum_order, supplier) 
-			VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['unit']."', '".$_POST['base_price']."', '".$_POST['tax']."', 1, '".$_POST['supplierid']."')";		
+			INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, minimum_order, supplier) 
+			VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."',  1, '".$_POST['supplierid']."')";		
 		mysqli_query($this->dbConnect, $sqlInsert);
 		echo 'New Product Added';
 	}	
@@ -439,10 +439,6 @@ class Inventory {
 			<tr>
 				<td>Base Price</td>
 				<td>'.$product["base_price"].'</td>
-			</tr>
-			<tr>
-				<td>Tax (%)</td>
-				<td>'.$product["tax"].'</td>
 			</tr>
 			<tr>
 				<td>Enter By</td>
@@ -575,14 +571,48 @@ class Inventory {
 		}
 		return $dropdownHTML;
 	}
-	public function addPurchase() {		
-		$sqlInsert = "
-			INSERT INTO ".$this->purchaseTable."(product_id, quantity, supplier_id) 
-			VALUES ('".$_POST['product']."', '".$_POST['quantity']."', '".$_POST['supplierid']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
+	public function addPurchase() {
+		// Fetch the current quantity
+		$productId = $_POST['product'];
+		$supplierId = $_POST['supplierid'];
+		$newQuantity = $_POST['quantity'];
+	
+		// Step 1: Get the current quantity
+		$stmt = $this->dbConnect->prepare("SELECT quantity FROM " . $this->productTable . " WHERE pid = ?");
+		$stmt->bind_param("i", $productId); // 'i' for integer
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$row = $result->fetch_assoc();
+		$stmt->close(); // Close the statement
+	
+		// Calculate the total quantity
+		$oldQuantity = $row['quantity'] ?? 0; // Default to 0 if no record found
+		$totalQuantity = $oldQuantity + $newQuantity;
+	
+		// Step 2: Update the product quantity
+		$sqlUpdate = "UPDATE " . $this->productTable . " SET quantity = ? WHERE pid = ?";
+		$stmt = $this->dbConnect->prepare($sqlUpdate);
+		$stmt->bind_param("ii", $totalQuantity, $productId); // Two integers
+		$stmt->execute();
+	
+		// Check if the update was successful
+		if ($stmt->affected_rows > 0) {
+			echo "Product quantity updated successfully.";
+		} else {
+			echo "Failed to update product quantity or no changes were made.";
+		}
+		$stmt->close(); // Close the statement
+	
+		// Step 3: Insert a new record into the purchase table
+		$sqlInsert = "INSERT INTO " . $this->purchaseTable . " (product_id, quantity, supplier_id) VALUES (?, ?, ?)";
+		$stmt = $this->dbConnect->prepare($sqlInsert);
+		$stmt->bind_param("iii", $productId, $newQuantity, $supplierId); // Three integers
+		$stmt->execute();
+		$stmt->close(); // Close the statement
+	
 		echo 'New Purchase Added';
-	}	
-	public function getPurchaseDetails(){
+	}
+		public function getPurchaseDetails(){
 		$sqlQuery = "
 			SELECT * FROM ".$this->purchaseTable." 
 			WHERE purchase_id = '".$_POST["purchase_id"]."'";
@@ -600,10 +630,20 @@ class Inventory {
 		}	
 	}	
 	public function deletePurchase(){
-		$sqlQuery = "
-			DELETE FROM ".$this->purchaseTable." 
-			WHERE purchase_id = '".$_POST['purchase_id']."'";		
-		mysqli_query($this->dbConnect, $sqlQuery);		
+		$sqlQuery = "DELETE FROM " . $this->purchaseTable . " WHERE purchase_id = ?";
+		$stmt = $this->dbConnect->prepare($sqlQuery);
+		$stmt->bind_param("i", $_POST['purchase_id']);  // 'i' for integer type
+		$stmt->execute();
+
+		// Check if the deletion was successful
+		if ($stmt->affected_rows > 0) {
+			echo "Purchase record deleted successfully.";
+		} else {
+			echo "No record found to delete or error in deletion.";
+		}
+
+		$stmt->close();
+
 	}
 	// order
 	public function listOrders(){		

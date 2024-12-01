@@ -91,9 +91,7 @@ $(document).ready(function() {
                 $('#pmodel').val(data.model);
                 $('#description').val(data.description);
                 $('#quantity').val(data.quantity);
-                $('#unit').val(data.unit);
                 $('#base_price').val(data.base_price);
-                $('#tax').val(data.tax);
                 $('#supplierid').val(data.supplier);
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Product");
                 $('#pid').val(pid);
