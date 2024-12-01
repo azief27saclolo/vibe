@@ -10,6 +10,9 @@ if(!empty($_GET['action']) && $_GET['action'] == 'logout') {
 if(!empty($_POST['action']) && $_POST['action'] == 'getInventoryDetails') {
 	$inventory->getInventoryDetails();
 }
+if(!empty($_POST['action']) && $_POST['action'] == 'getRevenueData') {
+	$inventory->getRevenueData();
+}
 // Customer management
 if(!empty($_POST['action']) && $_POST['action'] == 'customerList') {
 	$inventory->getCustomerList();
