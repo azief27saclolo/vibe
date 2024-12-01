@@ -13,8 +13,8 @@ $inventory->checkLogin();
 <script src="js/category.js"></script>
 <script src="js/common.js"></script>
 <?php include('inc/container.php');?>
-<div class="container">		
-		
+
+<div class="container">			
 	<?php include("menus.php"); ?> 
 	<div class="row">
 		<div class="col-lg-12">
