@@ -3,7 +3,7 @@ $(document).ready(function () {
     var page = url.substr(0, url.lastIndexOf('.'));
     $("a#" + page + "_menu").css({ 'color': '#FFF' });
 
-        var inventoryData = $('#getRevenueData').DataTable({
+        var inventoryData = $('#getRevenue').DataTable({
             "processing": true,
             "serverSide": true,
             "ajax": {
@@ -13,13 +13,13 @@ $(document).ready(function () {
                 dataType: "json"
             },
             "columns": [
-                { "data": "#" },
-                { "data": "product" },
-                { "data": "price" },
-                { "data": "pcs_sold" },
-                { "data": "sales" },
-                { "data": "profit" }
-            ],
+            { "data": "#" },
+            { "data": "product" },
+            { "data": "price" },
+            { "data": "pcs_sold" },
+            { "data": "sales" },
+            { "data": "profit" }
+        ],
             "order": [[0, "asc"]],
             "pageLength": 10,
             "lengthChange": false,

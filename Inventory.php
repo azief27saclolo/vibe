@@ -732,12 +732,12 @@ class Inventory {
 	public function getRevenueData() {
 		if ($_POST['action'] == 'getRevenueData') {
 			$sqlQuery = "SELECT p.pid AS id, p.pname AS product, p.price,
-								SUM(o.quantity) AS pcs_sold, 
-								SUM(o.quantity * p.price) AS sales,
-								(SUM(o.quantity * p.price) - SUM(o.cost_price * o.quantity)) AS profit
-						 FROM products p
-						 LEFT JOIN orders o ON p.pid = o.product_id
-						 GROUP BY p.pid";
+						SUM(o.quantity) AS pcs_sold, 
+						SUM(o.quantity * p.price) AS sales,
+						(SUM(o.quantity * p.price) - SUM(o.cost_price * o.quantity)) AS profit
+						FROM ".$this->productTable." p
+						LEFT JOIN ".$this->orderTable." o ON p.pid = o.product_id
+						GROUP BY p.pid;";
 		
 			if (isset($_POST['order'])) {
 				$sqlQuery .= ' ORDER BY ' . $_POST['order']['0']['column'] . ' ' . $_POST['order']['0']['dir'];
@@ -750,6 +750,9 @@ class Inventory {
 			}
 		
 			$result = mysqli_query($this->dbConnect, $sqlQuery);
+			if (!$result) {
+				die('Query failed: ' . mysqli_error($this->dbConnect));
+			}
 			$numRows = mysqli_num_rows($result);
 		
 			$data = [];
@@ -761,10 +764,12 @@ class Inventory {
 				"draw" => intval($_POST["draw"]),
 				"recordsTotal" => $numRows,
 				"recordsFiltered" => $numRows,
-				"data" => !empty($inventoryData) ? $inventoryData : []
-			);
+				"data" => !empty($data) ? $data : []
+			);			
 			
 			echo json_encode($output);
+			exit;
+
 		}		
 	}
 	public function getInventoryDetails(){		
