@@ -12,6 +12,7 @@
 				<li class="nav-item"><a class="nav-link" href="brand.php" id="brand_menu">Brand</a></li>
 				<li class="nav-item"><a class="nav-link" href="supplier.php" id="supplier_menu">Supplier</a></li>
 				<li class="nav-item"><a class="nav-link" href="product.php" id="product_menu">Product</a></li>
+				<li class="nav-item"><a class="nav-link" href="replaced.php" id="replaced_menu">Replaced</a></li>
 				<li class="nav-item"><a class="nav-link" href="purchase.php" id="purchase_menu">Purchase</a></li>
 				<li class="nav-item"><a class="nav-link" href="order.php" id="order_menu">Orders</a></li>			
 			</ul>

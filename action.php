@@ -129,3 +129,7 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteOrder'){
 	$inventory->deleteOrder();
 }
 
+// manage replace
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'addReplaced'){
+	$inventory->addReplaced();
+}

@@ -23,6 +23,7 @@ $(document).ready(function() {
     });
 
     $('#addProduct').click(function() {
+        console.log('Add Replace button clicked');
         $('#productModal').modal('show');
         $('#productForm')[0].reset();
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Product");
