@@ -722,6 +722,45 @@ class Inventory {
 		}
 		return $dropdownHTML;
 	}
+	// Revenue
+	public function getRevenueData() {
+		if ($_POST['action'] == 'getRevenueData') {
+			$sqlQuery = "SELECT p.pid AS id, p.pname AS product, p.price,
+								SUM(o.quantity) AS pcs_sold, 
+								SUM(o.quantity * p.price) AS sales,
+								(SUM(o.quantity * p.price) - SUM(o.cost_price * o.quantity)) AS profit
+						 FROM products p
+						 LEFT JOIN orders o ON p.pid = o.product_id
+						 GROUP BY p.pid";
+		
+			if (isset($_POST['order'])) {
+				$sqlQuery .= ' ORDER BY ' . $_POST['order']['0']['column'] . ' ' . $_POST['order']['0']['dir'];
+			} else {
+				$sqlQuery .= ' ORDER BY id ASC';
+			}
+		
+			if ($_POST['length'] != -1) {
+				$sqlQuery .= ' LIMIT ' . $_POST['start'] . ', ' . $_POST['length'];
+			}
+		
+			$result = mysqli_query($this->dbConnect, $sqlQuery);
+			$numRows = mysqli_num_rows($result);
+		
+			$data = [];
+			while ($row = mysqli_fetch_assoc($result)) {
+				$data[] = $row;
+			}
+		
+			$output = array(
+				"draw" => intval($_POST["draw"]),
+				"recordsTotal" => $numRows,
+				"recordsFiltered" => $numRows,
+				"data" => !empty($inventoryData) ? $inventoryData : []
+			);
+			
+			echo json_encode($output);
+		}		
+	}
 	public function getInventoryDetails(){		
 		$sqlQuery = "SELECT p.pid, p.pname, p.model, p.quantity as product_quantity, s.quantity as recieved_quantity, r.total_shipped
 			FROM ".$this->productTable." as p

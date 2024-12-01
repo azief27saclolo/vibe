@@ -6,11 +6,14 @@ include 'Inventory.php';
 $inventory = new Inventory();
 $inventory->checkLogin();
 ?>
+
 <script src="js/jquery.dataTables.min.js"></script>
 <script src="js/dataTables.bootstrap.min.js"></script>		
 <link rel="stylesheet" href="css/dataTables.bootstrap.min.css" />
 <script src="js/common.js"></script>
+
 <?php include('inc/container.php');?>
+
 <div class="container-fluid">
     <?php include("menus.php"); ?>   
     <div class="row">
