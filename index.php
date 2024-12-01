@@ -11,8 +11,8 @@ $inventory->checkLogin();
 <link rel="stylesheet" href="css/dataTables.bootstrap.min.css" />
 <script src="js/common.js"></script>
 <?php include('inc/container.php');?>
-<?php include("menus.php"); ?>   
 <div class="container-fluid">
+    <?php include("menus.php"); ?>   
     <div class="row">
         <div class="col-md-12">
             <div class="card card-default rounded-0 shadow">
