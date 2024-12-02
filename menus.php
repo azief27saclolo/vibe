@@ -8,6 +8,7 @@
         <ul class="nav navbar-nav mx-auto">
 			<li class="nav-item"><a class="nav-link" href="revenue.php"><i class="fa-solid fa-money-bill"></i> Revenue</a></li>
 			<li class="nav-item"><a class="nav-link" href="index.php"><i class="fas fa-home"></i> Home</a></li>
+			<li class="nav-item"><a class="nav-link" href="services.php"><i class="fas fa-cog"></i> Services</a></li>
 			<li class="nav-item"><a class="nav-link" href="customer.php"><i class="fas fa-users"></i> Customer</a></li>
 			<li class="nav-item"><a class="nav-link" href="category.php"><i class="fas fa-th-list"></i> Category</a></li>
 			<li class="nav-item"><a class="nav-link" href="brand.php"><i class="fas fa-tag"></i> Brand</a></li>
@@ -16,6 +17,7 @@
 			<li class="nav-item"><a class="nav-link" href="replaced.php"><i class="fas fa-info-circle"></i> Replaced</a></li>
 			<li class="nav-item"><a class="nav-link" href="purchase.php"><i class="fas fa-cart-plus"></i> Purchase</a></li>
 			<li class="nav-item"><a class="nav-link" href="order.php"><i class="fas fa-box"></i> Orders</a></li>
+			
 		</ul>
 
 		</div>
