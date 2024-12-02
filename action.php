@@ -149,3 +149,24 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getReplacedDetails')
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateReplaced'){
 	$inventory->updateReplaced();
 }
+
+//Services
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'addServices'){
+	$inventory->addServices();
+}
+
+if(!empty($_POST['action']) && $_POST['action'] == 'listServices') {
+	$inventory->listServices();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServices'){
+	$inventory->deleteServices();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServicesDetails'){
+	$inventory->getServicesDetails();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServices'){
+	$inventory->updateServices();
+}
