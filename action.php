@@ -162,14 +162,14 @@ if(!empty($_POST['action']) && $_POST['action'] == 'listServices') {
 	$inventory->listServices();
 }
 
-if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServices'){
-	$inventory->deleteServices();
-}
+// if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServices'){
+// 	$inventory->deleteServices();
+// }
 
-if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServicesDetails'){
-	$inventory->getServicesDetails();
-}
+// if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServicesDetails'){
+// 	$inventory->getServicesDetails();
+// }
 
-if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServices'){
-	$inventory->updateServices();
-}
+// if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServices'){
+// 	$inventory->updateServices();
+// }
