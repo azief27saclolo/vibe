@@ -8,13 +8,13 @@ $(document).ready(function() {
         "ajax": {
             url: "action.php",
             type: "POST",
-            data: { action: 'servicesList' },
+            data: { action: 'listServices' },
             dataType: "json"
         },
         "columnDefs": [{
             "targets": [0, 3],
             "orderable": false,
-        }, ],
+        }],
         "pageLength": 25,
         'rowCallback': function(row, data, index) {
             $(row).find('td').addClass('align-middle')
@@ -50,22 +50,29 @@ $(document).ready(function() {
         })
     });
 
-    // $(document).on('click', '.delete', function() {
-    //     var services_id = $(this).attr("id");  // Ensure it uses 'id' instead of 'replacement_id'
-    //     var btn_action = 'deleteServices';
-    //     if (confirm("Are you sure you want to delete this replace?")) {
-    //         $.ajax({
-    //             url: "action.php",
-    //             method: "POST",
-    //             data: { services_id: services_id, btn_action: btn_action },
-    //             success: function(data) {
-    //                 servicesData.ajax.reload();
-    //             }
-    //         });
-    //     } else {
-    //         return false;
-    //     }
-    // });
+    $(document).on('click', '.delete', function() {
+        var services_id = $(this).attr("id");  
+        var btn_action = 'deleteServices';
+        if (confirm("Are you sure you want to delete this service?")) {
+            $.ajax({
+                url: "action.php",
+                method: "POST",
+                data: { service_id: services_id, btn_action: btn_action },
+                success: function(data) {
+                    console.log('Im in Delete');
+                    console.log('Response:', data); // Log the response from the server
+                    servicesData.ajax.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                }
+            });
+        } else {
+            return false;
+        }
+    });
 
 
     // $(document).on('click', '.update', function() {

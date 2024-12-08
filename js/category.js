@@ -19,7 +19,7 @@ $(document).ready(function() {
         "columnDefs": [{
             "targets": [0, 3],
             "orderable": false,
-        }, ],
+        }],
         "pageLength": 25,
         'rowCallback': function(row, data, index) {
             $(row).find('td').addClass('align-middle')

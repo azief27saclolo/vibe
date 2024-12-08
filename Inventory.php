@@ -913,17 +913,13 @@ class Inventory {
 		echo 'New order added';
 	}
 
-
 	public function listServices() {
-		$sqlQuery = "SELECT *
-					 FROM ".$this->servicesTable." 
-					 "; // Join for both phone and part
-		
+		$sqlQuery = "SELECT * FROM ".$this->servicesTable; 
 		// Apply ordering if set
 		if (isset($_POST['order'])) {
 			$sqlQuery .= ' ORDER BY ' . $_POST['order']['0']['column'] . ' ' . $_POST['order']['0']['dir'] . ' ';
 		} else {
-			$sqlQuery .= ' ORDER BY service_name  DESC ';
+			$sqlQuery .= ' ORDER BY service_name DESC ';
 		}
 		
 		// Apply pagination if set
@@ -933,41 +929,34 @@ class Inventory {
 		
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
-		$replacedData = array();
-		$intermediate =1;
-		while ($purchase = mysqli_fetch_assoc($result)) {
-			// Format each row based on the fields in your table
-			$replacedRow = array();
-			$replacedRow[] = $intermediate++;
-			$replacedRow[] = $purchase['service_name'];    
-			$replacedRow[] = $purchase['service_price'];  
-			$replacedRow[] = '<div class="btn-group btn-group-sm">
-								 <button type="button" name="update" id="' . $purchase["service_id"] . '" 
-										 class="btn btn-primary btn-sm rounded-0 update" title="Update">
-									 <i class="fa fa-edit"></i>
-								 </button>
-								 <button type="button" name="delete" id="' . $purchase["service_id"] . '" 
-										 class="btn btn-danger btn-sm rounded-0 delete" title="Delete">
-									 <i class="fa fa-trash"></i>
-								 </button>
-							  </div>'; // Action buttons
-		
-			$replacedData[] = $replacedRow;
+		$servicesData = array();
+		$intermediate = 1;
+		while ($service = mysqli_fetch_assoc($result)) {
+			$serviceRow = array();
+			$serviceRow[] = $intermediate++;
+			$serviceRow[] = $service['service_name'];
+			$serviceRow[] = $service['service_price'];
+			$serviceRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="update" id="'.$service["service_id"].'" class="btn btn-primary btn-sm rounded-0 update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$service["service_id"].'" class="btn btn-danger btn-sm rounded-0 delete" title="Delete"><i class="fa fa-trash"></i></button></div>';
+			$servicesData[] = $serviceRow;
 		}
-	
-		// Output the data as a JSON response
 		$output = array(
 			"draw" => intval($_POST["draw"]),
 			"recordsTotal" => $numRows,
-			"recordsFiltered" => $numRows, // If filtering is applied, adjust accordingly
-			"data" => $replacedData
+			"recordsFiltered" => $numRows,
+			"data" => $servicesData
 		);
-		
-		
-		echo json_encode($output); // Return the JSON response
-		
+		echo json_encode($output);
 	}
 
+	public function deleteServices(){
+		$sqlQuery = "DELETE FROM ".$this->servicesTable." WHERE service_id = '".$_POST["service_id"]."'";	
+		if (mysqli_query($this->dbConnect, $sqlQuery)) {
+			echo "Service deleted successfully.";
+		} else {
+			echo "Error deleting service: " . mysqli_error($this->dbConnect);
+		}
+	}
 
 }
 ?>
+
