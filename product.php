@@ -41,6 +41,7 @@ $inventory->checkLogin();
 									<th>Product Model</th>
                                     <th>Quantity</th>
                                     <th>Supplier Name</th>
+                                    <th>Parts Replaced</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr></thead>
@@ -73,6 +74,7 @@ $inventory->checkLogin();
                                     <label>Select Brand</label>
                                     <select name="brandid" id="brandid" class="form-select rounded-0" required>
                                         <option value="">Select Brand</option>
+                                        
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -104,6 +106,15 @@ $inventory->checkLogin();
                                         <?php echo $inventory->supplierDropdownList();?>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label>Part Replaced</label>
+                                    <select name="partid" id="partid" class="form-select rounded-0">
+                                        <option value="">Select Part</option>
+                                        <?php echo $inventory->partsDropdownList();?>
+                                    </select>
+                                    <div id="selectedPartsContainer" class="mt-2"></div>
+                                </div>
+                                
                             </form>
                         </div>
                         <div class="modal-footer">

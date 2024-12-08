@@ -59,14 +59,15 @@ $inventory->checkLogin();
                                 <input type="hidden" name="services_id" id="services_id" />
                                 
 								<div class="form-group">
-                                    <label>Service Name</label>
-                                    <input type="text" name="service_name" id="service_name" class="form-control rounded-0"  />
+                                    <label>Service Name  <span class="error"><?= $error ?></label>
+                                    <input type="text" name="service_name" id="service_name" class="form-control rounded-0 required"  />
                                 </div>
 
 
                                 <div class="form-group">
-                                    <label>Service Price</label>
-                                    <input type="number" name="service_price" id="service_price" class="form-control rounded-0"  />
+                                    <label>Service Price <span class="error"><?= $error ?></span></label>
+                                    <input type="number" name="service_price" id="service_price" class="form-control rounded-0 required"  />
+
                                 </div>
 
                             </form>

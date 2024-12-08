@@ -290,10 +290,11 @@ class Inventory {
 	}
 	// Product management 
 	public function getProductList(){				
-		$sqlQuery = "SELECT * FROM ".$this->productTable." as p
-			INNER JOIN ".$this->brandTable." as b ON b.id = p.brandid
-			INNER JOIN ".$this->categoryTable." as c ON c.categoryid = p.categoryid 
-			INNER JOIN ".$this->supplierTable." as s ON s.supplier_id = p.supplier ";
+		$sqlQuery = "SELECT p.*, b.bname, c.name as category_name, s.supplier_name 
+					 FROM ".$this->productTable." as p
+					 INNER JOIN ".$this->brandTable." as b ON b.id = p.brandid
+					 INNER JOIN ".$this->categoryTable." as c ON c.categoryid = p.categoryid 
+					 INNER JOIN ".$this->supplierTable." as s ON s.supplier_id = p.supplier ";
 		if(isset($_POST["search"]["value"])) {
 			$sqlQuery .= 'WHERE b.bname LIKE "%'.$_POST["search"]["value"].'%" ';
 			$sqlQuery .= 'OR c.name LIKE "%'.$_POST["search"]["value"].'%" ';
@@ -321,18 +322,32 @@ class Inventory {
 			} else {
 				$status = '<span class="label label-danger">Inactive</span>';
 			}
+
+			// Fetch parts replaced
+			$sqlPartsQuery = "
+				SELECT p.pname 
+				FROM ".$this->replacedTable." as r
+				INNER JOIN ".$this->productTable." as p ON r.part_pid = p.pid
+				WHERE r.phone_pid = '".$product['pid']."'";
+			$partsResult = mysqli_query($this->dbConnect, $sqlPartsQuery);
+			$partsReplaced = [];
+			while ($part = mysqli_fetch_assoc($partsResult)) {
+				$partsReplaced[] = $part['pname'];
+			}
+			$partsReplacedHtml = !empty($partsReplaced) ? implode(', ', $partsReplaced) : 'None';
+
 			$productRow = array();
 			$productRow[] = $increment++;
-			$productRow[] = $product['name'];
+			$productRow[] = $product['category_name'];
 			$productRow[] = $product['bname'];
 			$productRow[] = $product['pname'];	
 			$productRow[] = $product['model'];			
 			$productRow[] = $product["quantity"];
 			$productRow[] = $product['supplier_name'];
+			$productRow[] = $partsReplacedHtml; // Add parts replaced column
 			$productRow[] = $status;
 			$productRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="view" id="'.$product["pid"].'" class="btn btn-light bg-gradient border text-dark btn-sm rounded-0  view" title="View"><i class="fa fa-eye"></i></button><button type="button" name="update" id="'.$product["pid"].'" class="btn btn-primary btn-sm rounded-0  update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$product["pid"].'" class="btn btn-danger btn-sm rounded-0  delete" data-status="'.$product["status"].'" title="Delete"><i class="fa fa-trash"></i></button></div>';
 			$productData[] = $productRow;
-						
 		}
 		$outputData = array(
 			"draw"    			=> 	intval($_POST["draw"]),
@@ -368,6 +383,18 @@ class Inventory {
 			INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, minimum_order, supplier) 
 			VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."',  1, '".$_POST['supplierid']."')";		
 		mysqli_query($this->dbConnect, $sqlInsert);
+		$productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
+
+		// Insert selected parts
+		if (!empty($_POST['selected_parts'])) {
+			foreach ($_POST['selected_parts'] as $partId) {
+				$sqlInsertPart = "
+					INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
+					VALUES ('".$productId."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
+				mysqli_query($this->dbConnect, $sqlInsertPart);
+			}
+		}
+
 		echo 'New Product Added';
 	}	
 	public function getProductDetails(){
@@ -387,6 +414,20 @@ class Inventory {
 			$output['base_price'] = $product['base_price'];
 			$output['supplier'] = $product['supplier'];
 		}
+
+		// Fetch parts replaced
+		$sqlPartsQuery = "
+			SELECT p.pname 
+			FROM ".$this->replacedTable." as r
+			INNER JOIN ".$this->productTable." as p ON r.part_pid = p.pid
+			WHERE r.phone_pid = '".$_POST["pid"]."'";
+		$partsResult = mysqli_query($this->dbConnect, $sqlPartsQuery);
+		$partsReplaced = [];
+		while ($part = mysqli_fetch_assoc($partsResult)) {
+			$partsReplaced[] = $part['pname'];
+		}
+		$output['parts_replaced'] = $partsReplaced;
+
 		echo json_encode($output);
 	}
 	public function updateProduct() {		
@@ -652,7 +693,7 @@ class Inventory {
 			echo "No record found to delete or error in deletion.";
 		}
 
-		$stmt->close();
+		stmt->close();
 
 	}
 	// order
@@ -756,7 +797,7 @@ class Inventory {
 				$inventory['total_shipped'] = 0;
 			}
 			
-			$inventoryInHand = ($inventory['product_quantity'] + $inventory['recieved_quantity']) - $inventory['total_shipped'];
+			$inventoryInHand = ($inventory['product_quantity']  - $inventory['total_shipped']);
 		
 			$inventoryRow = array();
 			$inventoryRow[] = $i++;
@@ -777,6 +818,7 @@ class Inventory {
 		);
 		echo json_encode($output);		
 	}
+	
 	
 	
 	// REplaced 
@@ -903,14 +945,25 @@ class Inventory {
 		}	
 	}	
 
+
+
 	//SERVICES
 
 	public function addServices() {
-		$sqlInsert = "
-			INSERT INTO ".$this->servicesTable."(service_name, service_price) 
-			VALUES ('".$_POST['service_name']."', '".$_POST['service_price']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		echo 'New order added';
+		if(empty($_POST('service_name'))){
+			echo 'Service name is required';
+			return 'Service name is required';
+		}elseif(empty($_POST('service_price'))){
+			echo 'Service price is required';
+			return 'Service Price is required';
+		}else{
+			$sqlInsert = "
+				INSERT INTO ".$this->servicesTable."(service_name, service_price) 
+				VALUES ('".$_POST['service_name']."', '".$_POST['service_price']."')";		
+			mysqli_query($this->dbConnect, $sqlInsert);
+			echo 'New order added';
+		}
+
 	}
 
 	public function listServices() {
@@ -956,6 +1009,14 @@ class Inventory {
 			echo "Error deleting service: " . mysqli_error($this->dbConnect);
 		}
 	}
+
+	public function updateServices() {		
+		if($_POST['id']) {	
+			$sqlUpdate = "UPDATE ".$this->brandTable." SET bname = '".$_POST['bname']."', categoryid='".$_POST['categoryid']."' WHERE id = '".$_POST["id"]."'";
+			mysqli_query($this->dbConnect, $sqlUpdate);	
+			echo 'Brand Update';
+		}	
+	}	
 
 }
 ?>
