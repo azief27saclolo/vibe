@@ -34,6 +34,14 @@ $(document).ready(function() {
     $(document).on('change', '#categoryid', function() {
         var categoryid = $('#categoryid').val();
         var btn_action = 'getCategoryBrand';
+        var categoryname = $('#categoryid option:selected').text();
+
+        if(categoryname == "Phone"){
+            $('#part_select').removeClass('hidden');
+        }else{
+            $('#part_select').addClass('hidden');
+        }
+
         $.ajax({
             url: "action.php",
             method: "POST",
@@ -48,20 +56,24 @@ $(document).ready(function() {
         var selectedPartName = $("#partid option:selected").text();
         var selectedPartId = $("#partid").val();
         if (selectedPartName && selectedPartId) {
-            var buttonHtml = '<button type="button" class="btn btn-secondary mt-2 selected-part-button" data-part-id="' + selectedPartId + '">' + selectedPartName + '</button>';
+            var buttonHtml = '<button type="button" class="btn btn-secondary ml-1 mt-2 selected-part-button" data-part-id="' + selectedPartId + '">' + selectedPartName + '</button>';
             $('#selectedPartsContainer').append(buttonHtml);
             $("#partid option:selected").remove(); // Remove the selected option from the dropdown
             $("#partid").val(""); // Reset the dropdown
         }
     });
 
+
     $(document).on('click', '.selected-part-button', function() {
         var partId = $(this).data('part-id');
         var partName = $(this).text();
-        $('#partid').append('<option value="' + partId + '">' + partName + '</option>'); // Add the option back to the dropdown
+        if ($('#partid option[value="' + partId + '"]').length === 0) {
+            $('#partid').append('<option value="' + partId + '">' + partName + '</option>'); // Add the option back to the dropdown
+        }
         $(this).remove(); // Remove the button
     });
 
+    //=======================
     $(document).on('submit', '#productForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
@@ -81,6 +93,12 @@ $(document).ready(function() {
             $('#productModal').modal('hide');
             $('#action').attr('disabled', false);
             productData.ajax.reload();
+
+            // Remove buttons in #part_select
+            $('#part_select .selected-part-button').remove();
+            
+            // Restore all values in dropdown
+            $('#categoryid').val('').trigger('change');
         }
     });
 });
@@ -122,19 +140,24 @@ $(document).ready(function() {
                 $('#pid').val(pid);
                 $('#action').val("Edit");
                 $('#btn_action').val("updateProduct");
-
-                // Display parts replaced
-                var partsReplacedHtml = '';
-                if (data.parts_replaced.length > 0) {
-                    partsReplacedHtml = '<ul>';
-                    data.parts_replaced.forEach(function(part) {
-                        partsReplacedHtml += '<li>' + part + '</li>';
-                    });
-                    partsReplacedHtml += '</ul>';
+                
+                // Show "Part Replaced" section if category is Phone
+                if ($('#categoryid option:selected').text() === "Phone") {
+                    $('#part_select').removeClass('hidden');
                 } else {
-                    partsReplacedHtml = 'None';
+                    $('#part_select').addClass('hidden');
                 }
-                $('#selectedPartsContainer').html(partsReplacedHtml);
+
+                // Display replaced parts as buttons and remove them from the dropdown
+                $('#selectedPartsContainer').empty();
+                $('#partid').find('option').show(); // Show all options first
+                if (data.parts_replaced && data.parts_replaced.length > 0) {
+                    data.parts_replaced.forEach(function(part) {
+                        var buttonHtml = '<button type="button" class="btn btn-secondary ml-1 mt-2 selected-part-button" data-part-id="' + part.part_pid + '">' + part.pname + '</button>';
+                        $('#selectedPartsContainer').append(buttonHtml);
+                        $('#partid').find('option[value="' + part.part_pid + '"]').remove(); // Remove the option from the dropdown
+                    });
+                }
             }
         })
     });

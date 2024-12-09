@@ -106,7 +106,7 @@ $inventory->checkLogin();
                                         <?php echo $inventory->supplierDropdownList();?>
                                     </select>
                                 </div>
-                                <div class="form-group">
+                                <div id="part_select" class="form-group  hidden">
                                     <label>Part Replaced</label>
                                     <select name="partid" id="partid" class="form-select rounded-0">
                                         <option value="">Select Part</option>

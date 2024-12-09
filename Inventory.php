@@ -417,27 +417,42 @@ class Inventory {
 
 		// Fetch parts replaced
 		$sqlPartsQuery = "
-			SELECT p.pname 
+			SELECT r.part_pid, p.pname 
 			FROM ".$this->replacedTable." as r
 			INNER JOIN ".$this->productTable." as p ON r.part_pid = p.pid
 			WHERE r.phone_pid = '".$_POST["pid"]."'";
 		$partsResult = mysqli_query($this->dbConnect, $sqlPartsQuery);
 		$partsReplaced = [];
 		while ($part = mysqli_fetch_assoc($partsResult)) {
-			$partsReplaced[] = $part['pname'];
+			$partsReplaced[] = $part;
 		}
 		$output['parts_replaced'] = $partsReplaced;
 
 		echo json_encode($output);
 	}
 	public function updateProduct() {		
-		if($_POST['pid']) {	
-			$sqlUpdate = "UPDATE ".$this->productTable." 
-				SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
-			mysqli_query($this->dbConnect, $sqlUpdate);	
-			echo 'Product Update';
-		}	
-	}	 
+        if($_POST['pid']) {	
+            $sqlUpdate = "UPDATE ".$this->productTable." 
+                SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
+            mysqli_query($this->dbConnect, $sqlUpdate);
+
+            // Remove existing replaced parts
+            $sqlDeleteParts = "DELETE FROM ".$this->replacedTable." WHERE phone_pid = '".$_POST["pid"]."'";
+            mysqli_query($this->dbConnect, $sqlDeleteParts);
+
+            // Insert updated replaced parts
+            if (!empty($_POST['selected_parts'])) {
+                foreach ($_POST['selected_parts'] as $partId) {
+                    $sqlInsertPart = "
+                        INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
+                        VALUES ('".$_POST["pid"]."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
+                    mysqli_query($this->dbConnect, $sqlInsertPart);
+                }
+            }
+
+            echo 'Product Update';
+        }	
+    }	 
 	public function deleteProduct(){
 		$sqlQuery = "
 			DELETE FROM ".$this->productTable." 
@@ -452,7 +467,7 @@ class Inventory {
 			WHERE p.pid = '".$_POST["pid"]."'";
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$productDetails = '<div class="table-responsive">
-				<table class="table table-boredered">';
+				<table class="table table-bordered">';
 		while( $product = mysqli_fetch_assoc($result) ) {
 			$status = '';
 			if($product['status'] == 'active') {
@@ -496,13 +511,30 @@ class Inventory {
 			<tr>
 				<td>Status</td>
 				<td>'.$status.'</td>
-			</tr>
-			';
+			</tr>';
+
+			// Fetch and display replaced parts
+			$sqlPartsQuery = "
+				SELECT p.pname 
+				FROM ".$this->replacedTable." as r
+				INNER JOIN ".$this->productTable." as p ON r.part_pid = p.pid
+				WHERE r.phone_pid = '".$product['pid']."'";
+			$partsResult = mysqli_query($this->dbConnect, $sqlPartsQuery);
+			$partsReplaced = [];
+			while ($part = mysqli_fetch_assoc($partsResult)) {
+				$partsReplaced[] = $part['pname'];
+			}
+			$partsReplacedHtml = !empty($partsReplaced) ? implode(', ', $partsReplaced) : 'None';
+
+			$productDetails .= '
+			<tr>
+				<td>Parts Replaced</td>
+				<td>'.$partsReplacedHtml.'</td>
+			</tr>';
 		}
 		$productDetails .= '
 			</table>
-		</div>
-		';
+		</div>';
 		echo $productDetails;
 	}
 	// supplier 
