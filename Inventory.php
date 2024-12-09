@@ -343,6 +343,8 @@ class Inventory {
 			$productRow[] = $product['pname'];	
 			$productRow[] = $product['model'];			
 			$productRow[] = $product["quantity"];
+			$productRow[] = $product["base_price"];
+			$productRow[] = $product["selling_price"];
 			$productRow[] = $product['supplier_name'];
 			$productRow[] = $partsReplacedHtml; // Add parts replaced column
 			$productRow[] = $status;
@@ -379,24 +381,25 @@ class Inventory {
 		return $dropdownHTML;
 	}
 	public function addProduct() {		
-		$sqlInsert = "
-			INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, minimum_order, supplier) 
-			VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."',  1, '".$_POST['supplierid']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		$productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
+    $sqlInsert = "
+        INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, selling_price, minimum_order, supplier) 
+        VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', 1, '".$_POST['supplierid']."')";		
+    mysqli_query($this->dbConnect, $sqlInsert);
+    $productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
 
-		// Insert selected parts
-		if (!empty($_POST['selected_parts'])) {
-			foreach ($_POST['selected_parts'] as $partId) {
-				$sqlInsertPart = "
-					INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
-					VALUES ('".$productId."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
-				mysqli_query($this->dbConnect, $sqlInsertPart);
-			}
-		}
+    // Insert selected parts
+    if (!empty($_POST['selected_parts'])) {
+        foreach ($_POST['selected_parts'] as $partId) {
+            $sqlInsertPart = "
+                INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
+                VALUES ('".$productId."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
+            mysqli_query($this->dbConnect, $sqlInsertPart);
+        }
+    }
 
-		echo 'New Product Added';
-	}	
+
+    echo 'New Product Added';
+}	
 	public function getProductDetails(){
 		$sqlQuery = "
 			SELECT * FROM ".$this->productTable." 
@@ -646,6 +649,8 @@ class Inventory {
 		echo json_encode($output);		
 	}
 	public function productDropdownList(){	
+
+
 		$sqlQuery = "SELECT * FROM ".$this->productTable." ORDER BY pname ASC";
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$dropdownHTML = '';
@@ -749,7 +754,7 @@ class Inventory {
 			$orderRow = array();
 			$orderRow[] = $increment++;
 			$orderRow[] = $order['pname'];
-			$orderRow[] = $order['total_shipped'];	
+			$orderRow[] = $order['total_sell'];	
 			$orderRow[] = $order['name'];			
 			$orderRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="update" id="'.$order["order_id"].'" class="btn btn-primary btn-sm rounded-0  update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$order["order_id"].'" class="btn btn-danger btn-sm rounded-0  delete" title="Delete"><i class="fa fa-trash"></i></button></button';
 			$orderData[] = $orderRow;
@@ -765,9 +770,17 @@ class Inventory {
 	}
 	public function addOrder() {		
 		$sqlInsert = "
-			INSERT INTO ".$this->orderTable."(product_id, total_shipped, customer_id) 
-			VALUES ('".$_POST['product']."', '".$_POST['shipped']."', '".$_POST['customer']."')";		
+			INSERT INTO ".$this->orderTable."(product_id, total_sell, customer_id) 
+			VALUES ('".$_POST['product']."', '".$_POST['sold']."', '".$_POST['customer']."')";		
 		mysqli_query($this->dbConnect, $sqlInsert);
+
+		$sqlInsert = "
+			UPDATE ".$this->productTable."
+			SET quantity = quantity - '".$_POST['sold']."'
+			WHERE pid = '".$_POST['product']."'";
+
+		mysqli_query($this->dbConnect, $sqlInsert);
+
 		echo 'New order added';
 	}		
 
@@ -780,20 +793,87 @@ class Inventory {
 		echo json_encode($row);
 	}
 	public function updateOrder() {
+		$sqlQuery = "
+			SELECT * FROM ".$this->orderTable." 
+			WHERE order_id = '".$_POST["order_id"]."'";
+		$result = mysqli_query($this->dbConnect, $sqlQuery);	
+		$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
+
+		$old_name = $row['product_id'];
+		$new_name = $_POST['product'];
+
+		if($old_name != $new_name){
+			$sqlUpdate = "
+			UPDATE ".$this->productTable."
+			SET quantity = quantity + '".$row['total_sell']."'
+			WHERE pid = '".$old_name."'";
+			mysqli_query($this->dbConnect, $sqlUpdate);
+
+			$sqlUpdate = "
+			UPDATE ".$this->productTable."
+			SET quantity = quantity - '".$row['total_sell']."'
+			WHERE pid = '".$new_name."'";
+			mysqli_query($this->dbConnect, $sqlUpdate);
+		}
+
+		$old_order = $row['total_sell'];
+		$update_order = $_POST['sold'];
+		$order = 0;
+
+		if($update_order > $old_order){
+			$order = $update_order - $old_order;
+			
+			$sqlUpdate = "
+			UPDATE ".$this->productTable."
+			SET quantity = quantity - '".$order."'
+			WHERE pid = '".$_POST['product']."'";
+
+			mysqli_query($this->dbConnect, $sqlUpdate);
+
+		} else {
+			$order = $old_order - $update_order;
+
+			$sqlUpdate = "
+			UPDATE ".$this->productTable."
+			SET quantity = quantity + '".$order."'
+			WHERE pid = '".$_POST['product']."'";
+
+			mysqli_query($this->dbConnect, $sqlUpdate);
+		}
+
 		if($_POST['order_id']) {	
 			$sqlUpdate = "
 				UPDATE ".$this->orderTable." 
-				SET product_id = '".$_POST['product']."', total_shipped='".$_POST['shipped']."', customer_id='".$_POST['customer']."' WHERE order_id = '".$_POST['order_id']."'";		
+				SET product_id = '".$_POST['product']."', total_sell='".$_POST['sold']."', customer_id='".$_POST['customer']."' WHERE order_id = '".$_POST['order_id']."'";		
 			mysqli_query($this->dbConnect, $sqlUpdate);	
+
 			echo 'Order Edited';
 		}	
+
 	}	
 	public function deleteOrder(){
-		$sqlQuery = "
-			DELETE FROM ".$this->orderTable." 
-			WHERE order_id = '".$_POST['order_id']."'";		
-		mysqli_query($this->dbConnect, $sqlQuery);		
-	}
+        // Fetch the order details to get the product ID and quantity sold
+        $sqlQuery = "
+            SELECT product_id, total_sell 
+            FROM ".$this->orderTable." 
+            WHERE order_id = '".$_POST['order_id']."'";
+        $result = mysqli_query($this->dbConnect, $sqlQuery);
+        $order = mysqli_fetch_assoc($result);
+
+        // Update the product quantity
+        $sqlUpdate = "
+            UPDATE ".$this->productTable."
+            SET quantity = quantity + '".$order['total_sell']."'
+            WHERE pid = '".$order['product_id']."'";
+        mysqli_query($this->dbConnect, $sqlUpdate);
+
+        // Delete the order
+        $sqlQuery = "
+            DELETE FROM ".$this->orderTable." 
+            WHERE order_id = '".$_POST['order_id']."'";
+        mysqli_query($this->dbConnect, $sqlQuery);
+    }
 	public function customerDropdownList(){	
 		$sqlQuery = "SELECT * FROM ".$this->customerTable." ORDER BY name ASC";
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
@@ -848,41 +928,28 @@ class Inventory {
 		}		
 	}
 	public function getInventoryDetails(){		
-		$sqlQuery = "SELECT p.pid, p.pname, p.model, p.quantity as product_quantity, s.quantity as recieved_quantity, r.total_shipped
-			FROM ".$this->productTable." as p
-			LEFT JOIN ".$this->purchaseTable." as s ON s.product_id = p.pid
-			LEFT JOIN ".$this->orderTable." as r ON r.product_id = p.pid ";		
-		if(isset($_POST['order'])) {
-			$sqlQuery .= 'ORDER BY '.$_POST['order']['0']['column'].' '.$_POST['order']['0']['dir'].' ';
-		} else {
-			$sqlQuery .= 'ORDER BY p.pid DESC ';
-		}
-		if($_POST['length'] != -1) {
-			$sqlQuery .= 'LIMIT ' . $_POST['start'] . ', ' . $_POST['length'];
-		}		
+		$sqlQuery = "SELECT p.pid, p.pname, p.model, p.quantity as product_quantity, 
+						(SELECT SUM(s.quantity) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid) as recieved_quantity, 
+						(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid) as total_sell
+					FROM ".$this->productTable." as p
+					GROUP BY p.pid"; // Group by product ID to sum quantities
+					
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$inventoryData = array();	
 		$i = 1;
 		while( $inventory = mysqli_fetch_assoc($result) ) {	
-
 			if(!$inventory['recieved_quantity']) {
 				$inventory['recieved_quantity'] = 0;
 			}
-			if(!$inventory['total_shipped']) {
-				$inventory['total_shipped'] = 0;
-			}
-			
-			$inventoryInHand = ($inventory['product_quantity']  - $inventory['total_shipped']);
-		
+
+			$inventoryInHand = ($inventory['product_quantity']  - $inventory['total_sell']);
 			$inventoryRow = array();
 			$inventoryRow[] = $i++;
-			$inventoryRow[] = "<div class='lh-1'><div>{$inventory['pname']}</div><div class='fw-bolder text-muted'><small>{$inventory['model']}</small></div></div>";
-			// $inventoryRow[] = $inventory['pname'];
-			// $inventoryRow[] = $inventory['model'];
-			$inventoryRow[] = $inventory['product_quantity'];
+			$inventoryRow[] = "<div class='lh-1'><div>{$inventory['pname']}</div><div class='fw-bolder text-muted'</div></div>";
+			$inventoryRow[] = $inventory['product_quantity'] - $inventory['recieved_quantity'];
 			$inventoryRow[] = $inventory['recieved_quantity'];	
-			$inventoryRow[] = $inventory['total_shipped'];
+			$inventoryRow[] = $inventory['total_sell'];
 			$inventoryRow[] = $inventoryInHand;			
 			$inventoryData[] = $inventoryRow;						
 		}
@@ -1093,6 +1160,13 @@ class Inventory {
 			echo 'Brand Update';
 		}	
 	}	
+
+    public function updateProductQuantity($productId, $quantity) {
+        $query = "UPDATE ims_product SET quantity = quantity - ? WHERE pid = ?";
+        $statement = $this->dbConnect->prepare($query);
+        $statement->bind_param("ii", $quantity, $productId);
+        $statement->execute();
+    }
 
 }
 ?>

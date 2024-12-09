@@ -29,11 +29,11 @@ $inventory->checkLogin();
 							<table id="inventoryDetails" class="table table-bordered table-striped">
 								<thead>
 									<tr>
-										<th>#</th>
+										<th>ID</th>
 										<th>Product/Code</th>
 										<th>Starting Inventory</th>
 										<th>Inventory Received</th>
-										<th>Inventory Shipped</th>
+										<th>Inventory Sold</th>
 										<th>Inventory on Hand</th>
 									</tr>
 							</thead>

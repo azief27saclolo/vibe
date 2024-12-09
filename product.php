@@ -40,6 +40,8 @@ $inventory->checkLogin();
                                     <th>Product Name</th>
 									<th>Product Model</th>
                                     <th>Quantity</th>
+                                    <th>Base Price</th>
+                                    <th>Selling Price</th>
                                     <th>Supplier Name</th>
                                     <th>Parts Replaced</th>
                                     <th>Status</th>
@@ -98,6 +100,10 @@ $inventory->checkLogin();
                                 <div class="form-group">
                                     <label>Product Base Price</label>
                                     <input type="number" name="base_price" id="base_price" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Product Selling Price</label>
+                                    <input type="number" name="selling_price" id="selling_price" class="form-control rounded-0" required pattern="[+-]?([0-9]*[.])?[0-9]+" />
                                 </div>
                                 <div class="form-group">
                                     <label>Supplier</label>

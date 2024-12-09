@@ -12,7 +12,7 @@ $(document).ready(function() {
             dataType: "json"
         },
         "columnDefs": [{
-            "targets": [0, 9], // Update the target to match the correct number of columns
+            "targets": [0, 11], // Update the target to match the correct number of columns
             "orderable": false,
         }],
         "pageLength": 10,

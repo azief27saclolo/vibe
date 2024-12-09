@@ -59,6 +59,7 @@ $inventory->checkLogin();
                             <form method="post" id="orderForm">
                             <input type="hidden" name="order_id" id="order_id" />
                             <input type="hidden" name="btn_action" id="btn_action" />
+                            <input type="hidden" name="product_id" id="product_id" />
                                 <div class="mb-3">
                                     <label>Product Name</label>
                                     <select name="product" id="product" class="form-select rounded-0" required>
@@ -69,7 +70,7 @@ $inventory->checkLogin();
                                 <div class="mb-3">
                                     <label>Total Item</label>
                                     <div class="input-group">
-                                        <input type="text" name="shipped" id="shipped" class="form-control rounded-0" required />        
+                                        <input type="text" name="sold" id="sold" class="form-control rounded-0" required />        
                                     </div>
                                 </div> 
                                 <div class="mb-3">
@@ -90,3 +91,4 @@ $inventory->checkLogin();
         </div>
 </div>	
 <?php include('inc/footer.php');?>
+
