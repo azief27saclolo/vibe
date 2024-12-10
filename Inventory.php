@@ -13,6 +13,8 @@ class Inventory {
 	private $purchaseTable = 'ims_purchase';
 
 	private $servicesTable = 'services';
+
+	private $service_availedTable = 'service_availed';
 	private $orderTable = 'ims_order';
 
 	private  $replacedTable = 'product_replacement_parts';
@@ -76,7 +78,6 @@ class Inventory {
 			$sqlQuery .= '(name LIKE "%'.$_POST["search"]["value"].'%" ';
 			$sqlQuery .= 'OR address LIKE "%'.$_POST["search"]["value"].'%" ';
 			$sqlQuery .= 'OR mobile LIKE "%'.$_POST["search"]["value"].'%") ';
-			$sqlQuery .= 'OR balance LIKE "%'.$_POST["search"]["value"].'%") ';
 		}
 		if(!empty($_POST["order"])){
 			$sqlQuery .= 'ORDER BY '.$_POST['order']['0']['column'].' '.$_POST['order']['0']['dir'].' ';
@@ -96,7 +97,6 @@ class Inventory {
 			$customerRows[] = $customer['name'];
 			$customerRows[] = $customer['address'];			
 			$customerRows[] = $customer['mobile'];	
-			$customerRows[] = number_format($customer['balance'],2);	
 			$customerRows[] = '<button type="button" name="update" id="'.$customer["id"].'" class="btn btn-primary btn-sm rounded-0 update" title="update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$customer["id"].'" class="btn btn-danger btn-sm rounded-0 delete" ><i class="fa fa-trash"></button>';
 			$customerRows[] = '';
 			$customerData[] = $customerRows;
@@ -112,16 +112,20 @@ class Inventory {
 
 	public function saveCustomer() {		
 		$sqlInsert = "
-			INSERT INTO ".$this->customerTable."(name, address, mobile, balance) 
-			VALUES ('".$_POST['cname']."', '".$_POST['address']."', '".$_POST['mobile']."', '".$_POST['balance']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		echo 'New Customer Added';
+			INSERT INTO ".$this->customerTable."(name, address, mobile) 
+			VALUES ('".$_POST['cname']."', '".$_POST['address']."', '".$_POST['mobile']."')";		
+		$success = mysqli_query($this->dbConnect, $sqlInsert);
+		if($success) {
+			echo 'Success';
+		} else {
+			echo 'Error';
+		}
 	}			
 	public function updateCustomer() {
 		if($_POST['userid']) {	
 			$sqlInsert = "
 				UPDATE ".$this->customerTable." 
-				SET name = '".$_POST['cname']."', address= '".$_POST['address']."', mobile = '".$_POST['mobile']."', balance = '".$_POST['balance']."' 
+				SET name = '".$_POST['cname']."', address= '".$_POST['address']."', mobile = '".$_POST['mobile']."' 
 				WHERE id = '".$_POST['userid']."'";		
 			mysqli_query($this->dbConnect, $sqlInsert);	
 			echo 'Customer Edited';
@@ -415,6 +419,7 @@ class Inventory {
 			$output['description'] = $product['description'];
 			$output['quantity'] = $product['quantity'];
 			$output['base_price'] = $product['base_price'];
+			$output['selling_price'] = $product['selling_price'];
 			$output['supplier'] = $product['supplier'];
 		}
 
@@ -436,7 +441,7 @@ class Inventory {
 	public function updateProduct() {		
         if($_POST['pid']) {	
             $sqlUpdate = "UPDATE ".$this->productTable." 
-                SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
+                SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
             mysqli_query($this->dbConnect, $sqlUpdate);
 
             // Remove existing replaced parts
@@ -1093,20 +1098,15 @@ class Inventory {
 	//SERVICES
 
 	public function addServices() {
-		if(empty($_POST('service_name'))){
-			echo 'Service name is required';
-			return 'Service name is required';
-		}elseif(empty($_POST('service_price'))){
-			echo 'Service price is required';
-			return 'Service Price is required';
-		}else{
+		
+		if($_POST['service_name'] && $_POST['service_price']){
 			$sqlInsert = "
 				INSERT INTO ".$this->servicesTable."(service_name, service_price) 
 				VALUES ('".$_POST['service_name']."', '".$_POST['service_price']."')";		
 			mysqli_query($this->dbConnect, $sqlInsert);
 			echo 'New order added';
 		}
-
+			
 	}
 
 	public function listServices() {
@@ -1153,13 +1153,6 @@ class Inventory {
 		}
 	}
 
-	public function updateServices() {		
-		if($_POST['id']) {	
-			$sqlUpdate = "UPDATE ".$this->brandTable." SET bname = '".$_POST['bname']."', categoryid='".$_POST['categoryid']."' WHERE id = '".$_POST["id"]."'";
-			mysqli_query($this->dbConnect, $sqlUpdate);	
-			echo 'Brand Update';
-		}	
-	}	
 
     public function updateProductQuantity($productId, $quantity) {
         $query = "UPDATE ims_product SET quantity = quantity - ? WHERE pid = ?";
@@ -1168,6 +1161,127 @@ class Inventory {
         $statement->execute();
     }
 
+	public function getServicesDetails() {
+        $sqlQuery = "
+            SELECT * FROM ".$this->servicesTable." 
+            WHERE service_id = '".$_POST["services_id"]."'";
+        $result = mysqli_query($this->dbConnect, $sqlQuery);    
+        $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        echo json_encode($row);
+    }
+
+    public function updateServices() {
+        if($_POST['services_id']) {    
+            $sqlUpdate = "
+                UPDATE ".$this->servicesTable." 
+                SET service_name = '".$_POST['service_name']."', service_price = '".$_POST['service_price']."' 
+                WHERE service_id = '".$_POST['services_id']."'";        
+            mysqli_query($this->dbConnect, $sqlUpdate);    
+            echo 'Service Updated';
+        }    
+    }
+
+
+	//service availed
+
+	
+public function service_availedList() {
+    $sqlQuery = "
+        SELECT sa.id, c.name as customer_name, s.service_name, sa.availed_date 
+        FROM ".$this->service_availedTable." sa
+        JOIN ".$this->customerTable." c ON sa.customer_id = c.id
+        JOIN ".$this->servicesTable." s ON sa.service_id = s.service_id";
+    
+    // Apply ordering if set
+    if (isset($_POST['order'])) {
+        $sqlQuery .= ' ORDER BY ' . $_POST['order']['0']['column'] . ' ' . $_POST['order']['0']['dir'] . ' ';
+    } else {
+        $sqlQuery .= ' ORDER BY sa.id DESC ';
+    }
+    
+    // Apply pagination if set
+    if ($_POST['length'] != -1) {
+        $sqlQuery .= 'LIMIT ' . $_POST['start'] . ', ' . $_POST['length'];
+    }
+    
+    $result = mysqli_query($this->dbConnect, $sqlQuery);
+    $numRows = mysqli_num_rows($result);
+    $servicesData = array();
+    $intermediate = 1;
+    while ($service = mysqli_fetch_assoc($result)) {
+        $serviceRow = array();
+        $serviceRow[] = $intermediate++;
+        $serviceRow[] = $service['customer_name'];
+        $serviceRow[] = $service['service_name'];
+        $serviceRow[] = $service['availed_date'];
+        $serviceRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="update" id="'.$service["id"].'" class="btn btn-primary btn-sm rounded-0 update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$service["id"].'" class="btn btn-danger btn-sm rounded-0 delete" title="Delete"><i class="fa fa-trash"></i></button></div>';
+        $servicesData[] = $serviceRow;
+    }
+    $output = array(
+        "draw" => intval($_POST["draw"]),
+        "recordsTotal" => $numRows,
+        "recordsFiltered" => $numRows,
+        "data" => $servicesData
+    );
+    
+    echo json_encode($output);
+}
+
+public function addServiceAvailed() {
+    $sqlInsert = "
+        INSERT INTO ".$this->service_availedTable."(customer_id, service_id, availed_date) 
+        VALUES ('".$_POST['customer_id']."', '".$_POST['service_id']."', '".$_POST['availed_date']."')";
+    mysqli_query($this->dbConnect, $sqlInsert);
+    echo 'Service Availed Added';
+}
+
+public function getServiceAvailedDetails() {
+    $sqlQuery = "
+        SELECT * FROM ".$this->service_availedTable." 
+        WHERE id = '".$_POST["service_availed_id"]."'";
+    $result = mysqli_query($this->dbConnect, $sqlQuery);
+    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    echo json_encode($row);
+}
+
+public function updateServiceAvailed() {
+    if($_POST['service_availed_id']) {
+        $sqlUpdate = "
+            UPDATE ".$this->service_availedTable." 
+            SET customer_id = '".$_POST['customer_id']."', service_id = '".$_POST['service_id']."', availed_date = '".$_POST['availed_date']."' 
+            WHERE id = '".$_POST['service_availed_id']."'";
+        mysqli_query($this->dbConnect, $sqlUpdate);
+        echo 'Service Availed Updated';
+    }
+}
+
+public function deleteServiceAvailed() {
+    $sqlQuery = "
+        DELETE FROM ".$this->service_availedTable." 
+        WHERE id = '".$_POST["service_availed_id"]."'";
+    mysqli_query($this->dbConnect, $sqlQuery);
+    echo 'Service Availed Deleted';
+}
+
+public function getCustomerListDropdown() {
+    $sqlQuery = "SELECT id, name FROM ".$this->customerTable." ORDER BY name ASC";
+    $result = mysqli_query($this->dbConnect, $sqlQuery);
+    $dropdownHTML = '<option value="">Select Customer</option>';
+    while ($customer = mysqli_fetch_assoc($result)) {
+        $dropdownHTML .= '<option value="'.$customer["id"].'">'.$customer["name"].'</option>';
+    }
+    echo $dropdownHTML;
+}
+
+public function getServiceListDropdown() {
+    $sqlQuery = "SELECT service_id, service_name FROM ".$this->servicesTable." ORDER BY service_name ASC";
+    $result = mysqli_query($this->dbConnect, $sqlQuery);
+    $dropdownHTML = '<option value="">Select Service</option>';
+    while ($service = mysqli_fetch_assoc($result)) {
+        $dropdownHTML .= '<option value="'.$service["service_id"].'">'.$service["service_name"].'</option>';
+    }
+    echo $dropdownHTML;
+}
 }
 ?>
 

@@ -75,23 +75,24 @@ $(document).ready(function() {
     });
 
 
-    // $(document).on('click', '.update', function() {
-    //     var services_id = $(this).attr("id");
-    //     var btnAction = 'getServices';
-    //     $.ajax({
-    //         url: "action.php",
-    //         method: "POST",
-    //         data: { services_id: services_id, btn_action: btnAction },
-    //         dataType: "json",
-    //         success: function(data) {
-    //             $('#servicesModal').modal('show');
-    //             $('#services_name').val(data.services_name);
-    //             $('.modal-title').html("<i class='fa fa-edit'></i> Edit Services");
-    //             $('#services_id').val(services_id);
-    //             $('#action').val('Edit');
-    //             $('#btn_action').val("updateServices");
-    //         }
-    //     })
-    // });
+    $(document).on('click', '.update', function() {
+        var services_id = $(this).attr("id");
+        var btn_action = 'getServicesDetails';
+        $.ajax({
+            url: "action.php",
+            method: "POST",
+            data: { services_id: services_id, btn_action: btn_action },
+            dataType: "json",
+            success: function(data) {
+                $('#servicesModal').modal('show');
+                $('#service_name').val(data.service_name);
+                $('#service_price').val(data.service_price);
+                $('.modal-title').html("<i class='fa fa-edit'></i> Update Service");
+                $('#services_id').val(services_id);
+                $('#action').val('Update');
+                $('#btn_action').val("updateServices");
+            }
+        })
+    });
 
 });

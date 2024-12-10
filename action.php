@@ -29,6 +29,9 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'customerUpdate'){
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'customerDelete'){
 	$inventory->deleteCustomer();
 }
+if(!empty($_POST['action']) && $_POST['action'] == 'getCustomerList') {
+    $inventory->getCustomerListDropdown();
+}
 // Category management
 if(!empty($_POST['action']) && $_POST['action'] == 'categoryList') {
 	$inventory->getCategoryList();
@@ -169,6 +172,32 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServices'){
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServices'){
 	$inventory->updateServices();
 }
-// if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServicesDetails'){
-// 	$inventory->getServicesDetails();
-// }
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServicesDetails'){
+	$inventory->getServicesDetails();
+}
+if(!empty($_POST['action']) && $_POST['action'] == 'getServiceList') {
+    $inventory->getServiceListDropdown();
+}
+
+//Service Availed
+
+if(!empty($_POST['action']) && $_POST['action'] == 'service_availedList') {
+	$inventory->service_availedList();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'addServiceAvailed'){
+    $inventory->addServiceAvailed();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServiceAvailedDetails'){
+    $inventory->getServiceAvailedDetails();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServiceAvailed'){
+    $inventory->updateServiceAvailed();
+}
+
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServiceAvailed'){
+    $inventory->deleteServiceAvailed();
+}
+?>

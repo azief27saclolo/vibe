@@ -17,6 +17,7 @@
 			<li class="nav-item"><a class="nav-link" href="replaced.php"><i class="fas fa-info-circle"></i> Replaced</a></li>
 			<li class="nav-item"><a class="nav-link" href="purchase.php"><i class="fas fa-cart-plus"></i> Purchase</a></li>
 			<li class="nav-item"><a class="nav-link" href="order.php"><i class="fas fa-box"></i> Orders</a></li>
+			<li class="nav-item"><a class="nav-link" href="service_availed.php"><i class="fas fa-shield-alt"></i> Service Availed</a></li>
 			
 		</ul>
 

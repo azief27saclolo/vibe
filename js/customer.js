@@ -4,6 +4,7 @@ $(document).ready(function() {
         $('#customerForm')[0].reset();
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Customer");
     });
+    
     var userdataTable = $('#customerList').DataTable({
         "lengthChange": false,
         "processing": true,
@@ -16,14 +17,14 @@ $(document).ready(function() {
             dataType: "json"
         },
         "columnDefs": [{
-            "target": [0, 5],
+            "target": [0, 4],
             "orderable": false
         }],
         "pageLength": 25,
         'rowCallback': function(row, data, index) {
             $(row).find('td').addClass('align-middle')
-            $(row).find('td:eq(0), td:eq(5)').addClass('text-center')
-            $(row).find('td:eq(4)').addClass('text-end')
+            $(row).find('td:eq(0), td:eq(3)').addClass('text-center')
+            $(row).find('td:eq(4)').addClass('text-center')
         },
     });
 
@@ -58,7 +59,6 @@ $(document).ready(function() {
                 $('#customerModal').modal('show');
                 $('#cname').val(data.name);
                 $('#mobile').val(data.mobile);
-                $('#balance').val(data.balance);
                 $('#address').val(data.address);
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Customer");
                 $('#userid').val(userid);

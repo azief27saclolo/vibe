@@ -135,6 +135,7 @@ $(document).ready(function() {
                 $('#description').val(data.description);
                 $('#quantity').val(data.quantity);
                 $('#base_price').val(data.base_price);
+                $('#selling_price').val(data.selling_price);
                 $('#supplierid').val(data.supplier);
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Product");
                 $('#pid').val(pid);
