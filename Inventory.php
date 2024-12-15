@@ -110,27 +110,39 @@ class Inventory {
 		echo json_encode($output);
 	}
 
-	public function saveCustomer() {		
-		$sqlInsert = "
-			INSERT INTO ".$this->customerTable."(name, address, mobile) 
-			VALUES ('".$_POST['cname']."', '".$_POST['address']."', '".$_POST['mobile']."')";		
-		$success = mysqli_query($this->dbConnect, $sqlInsert);
-		if($success) {
-			echo 'Success';
-		} else {
-			echo 'Error';
-		}
-	}			
+	public function saveCustomer() {
+    $sqlCheck = "SELECT * FROM ".$this->customerTable." WHERE mobile = '".$_POST['mobile']."'";
+    $result = mysqli_query($this->dbConnect, $sqlCheck);
+    if (mysqli_num_rows($result) > 0) {
+        echo '0';
+    } else {
+        $sqlInsert = "
+            INSERT INTO ".$this->customerTable."(name, address, mobile) 
+            VALUES ('".$_POST['cname']."', '".$_POST['address']."', '".$_POST['mobile']."')";
+        $success = mysqli_query($this->dbConnect, $sqlInsert);
+        if($success) {
+            echo '1';
+        } else {
+            echo '0';
+        }
+    }
+}			
 	public function updateCustomer() {
-		if($_POST['userid']) {	
-			$sqlInsert = "
-				UPDATE ".$this->customerTable." 
-				SET name = '".$_POST['cname']."', address= '".$_POST['address']."', mobile = '".$_POST['mobile']."' 
-				WHERE id = '".$_POST['userid']."'";		
-			mysqli_query($this->dbConnect, $sqlInsert);	
-			echo 'Customer Edited';
-		}	
-	}	
+    if($_POST['userid']) {
+        $sqlCheck = "SELECT * FROM ".$this->customerTable." WHERE mobile = '".$_POST['mobile']."' AND id != '".$_POST['userid']."'";
+        $result = mysqli_query($this->dbConnect, $sqlCheck);
+        if (mysqli_num_rows($result) > 0) {
+            echo 'duplicate';
+        } else {
+            $sqlInsert = "
+                UPDATE ".$this->customerTable." 
+                SET name = '".$_POST['cname']."', address= '".$_POST['address']."', mobile = '".$_POST['mobile']."' 
+                WHERE id = '".$_POST['userid']."'";
+            mysqli_query($this->dbConnect, $sqlInsert);
+            echo 'Customer Edited';
+        }
+    }
+}	
 	public function deleteCustomer(){
 		$sqlQuery = "
 			DELETE FROM ".$this->customerTable." 

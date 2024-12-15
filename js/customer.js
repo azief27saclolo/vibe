@@ -3,6 +3,7 @@ $(document).ready(function() {
         $('#customerModal').modal('show');
         $('#customerForm')[0].reset();
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Customer");
+        $('.text-danger').remove(); // Remove error messages
     });
     
     var userdataTable = $('#customerList').DataTable({
@@ -30,7 +31,6 @@ $(document).ready(function() {
 
     $(document).on('submit', '#customerForm', function(event) {
         event.preventDefault();
-        console.log('test')
         $('#action').attr('disabled', 'disabled');
         var formData = $(this).serialize();
         $.ajax({
@@ -38,11 +38,21 @@ $(document).ready(function() {
             method: "POST",
             data: formData,
             success: function(data) {
-                $('#customerForm')[0].reset();
-                $('#customerModal').modal('hide');
-                $('#alert_action').fadeIn().html('<div class="alert alert-success">' + data + '</div>');
-                $('#action').attr('disabled', false);
-                userdataTable.ajax.reload();
+                if (data <= 0) {
+                    $('#action').attr('disabled', false);
+                    if ($('#mobile').next('.text-danger').length === 0) {
+                        $('#mobile').after('<span class="text-danger">This mobile number is already registered.</span>');
+                    } else {
+                        $('#mobile').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                } else if(data > 0) {
+                    $('#customerForm')[0].reset();
+                    $('#customerModal').modal('hide');
+                    $('#alert_message').text('Customer Added');
+                    $('#alertModal').modal('show');
+                    $('#action').attr('disabled', false);
+                    userdataTable.ajax.reload();
+                }
             }
         })
     });
@@ -63,6 +73,7 @@ $(document).ready(function() {
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Customer");
                 $('#userid').val(userid);
                 $('#btn_action').val('customerUpdate');
+                $('.text-danger').remove(); // Remove error messages
             }
         })
     });
@@ -76,13 +87,34 @@ $(document).ready(function() {
                 method: "POST",
                 data: { userid: userid, btn_action: btn_action },
                 success: function(data) {
-                    $('#alert_action').fadeIn().html('<div class="alert alert-info">' + data + '</div>');
+                    $('#alert_message').text("Customer Deleted");
+                    $('#alertModal').modal('show');
                     userdataTable.ajax.reload();
                 }
             })
         } else {
             return false;
         }
+    });
+
+    $('#mobile').on('input', function() {
+        var mobile = $(this).val();
+        var userid = $('#userid').val();
+        $.ajax({
+            url: "action.php",
+            method: "POST",
+            data: { action: 'checkDuplicateMobile', mobile: mobile, userid: userid },
+            success: function(data) {
+                if (data === 'duplicate') {
+                    $('#mobile').next('.text-danger').remove();
+                    $('#mobile').after('<span class="text-danger">This mobile number is already registered.</span>');
+                    $('#action').attr('disabled', true);
+                } else {
+                    $('#mobile').next('.text-danger').remove();
+                    $('#action').attr('disabled', false);
+                }
+            }
+        });
     });
 
 });
