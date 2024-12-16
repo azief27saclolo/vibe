@@ -190,12 +190,19 @@ class Inventory {
 		);
 		echo json_encode($output);
 	}
-	public function saveCategory() {		
+	public function saveCategory() {	
 		$sqlInsert = "
-			INSERT INTO ".$this->categoryTable."(name) 
-			VALUES ('".$_POST['category']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		echo 'New Category Added';
+			SELECT * FROM ".$this->categoryTable." WHERE name = '".$_POST['category']."'";		
+		$result = mysqli_query($this->dbConnect, $sqlInsert);
+		if(mysqli_num_rows($result) > 0) {
+			echo '0';
+		} else {
+			$sqlInsert = "
+				INSERT INTO ".$this->categoryTable."(name) 
+				VALUES ('".$_POST['category']."')";		
+			mysqli_query($this->dbConnect, $sqlInsert);
+			echo '1';
+		}
 	}	
 	public function getCategory(){
 		$sqlQuery = "
@@ -208,11 +215,19 @@ class Inventory {
 	public function updateCategory() {
 		if($_POST['category']) {	
 			$sqlInsert = "
-				UPDATE ".$this->categoryTable." 
-				SET name = '".$_POST['category']."'
-				WHERE categoryid = '".$_POST["categoryId"]."'";	
-			mysqli_query($this->dbConnect, $sqlInsert);	
-			echo 'Category Update';
+			SELECT * FROM ".$this->categoryTable." WHERE name = '".$_POST['category']."' 
+			 AND categoryid != '".$_POST['categoryId']."'";		
+			$result = mysqli_query($this->dbConnect, $sqlInsert);
+				if(mysqli_num_rows($result) > 0) {
+					echo '0';
+				} else {
+					$sqlInsert = "
+						UPDATE ".$this->categoryTable." 
+						SET name = '".$_POST['category']."'
+						WHERE categoryid = '".$_POST["categoryId"]."'";	
+						mysqli_query($this->dbConnect, $sqlInsert);	
+						echo '1';
+				}
 		}	
 	}	
 	public function deleteCategory(){

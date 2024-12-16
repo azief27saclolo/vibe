@@ -4,6 +4,7 @@ $(document).ready(function() {
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Category");
         $('#action').val('Add');
         $('#btn_action').val('categoryAdd');
+        $('.text-danger').remove(); // Remove error messages
     });
     var categoryData = $('#categoryList').DataTable({
         "lengthChange": false,
@@ -29,17 +30,30 @@ $(document).ready(function() {
     $(document).on('submit', '#categoryForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);
         var formData = $(this).serialize();
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
             success: function(data) {
-                $('#categoryForm')[0].reset();
-                $('#categoryModal').modal('hide');
-                $('#alert_action').fadeIn().html('<div class="alert alert-success">' + data + '</div>');
-                $('#action').attr('disabled', false);
-                categoryData.ajax.reload();
+                if (data <= 0) {
+                    if ($('#category').next('.text-danger').length === 0) {
+                        $('#category').after('<span class="text-danger">This category is already exist.</span>');
+                    } else {
+                        $('#category').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                } else if(data > 0 ) {
+                    $('#alert_message').text('Category Updated');
+                    $('#alertModal').modal('show');
+                    $('#categoryForm')[0].reset();
+                    $('#categoryModal').modal('hide');
+                    $('#action').attr('disabled', false);
+                    categoryData.ajax.reload();
+                }
+                
             }
         })
     });
@@ -58,6 +72,7 @@ $(document).ready(function() {
                 $('#categoryId').val(categoryId);
                 $('#action').val('Edit');
                 $('#btn_action').val("updateCategory");
+                $('.text-danger').remove(); // Remove error messages
             }
         })
     });
@@ -71,7 +86,8 @@ $(document).ready(function() {
                 method: "POST",
                 data: { categoryId: categoryId, status: status, btn_action: btn_action },
                 success: function(data) {
-                    $('#alert_action').fadeIn().html('<div class="alert alert-info">' + data + '</div>');
+                    $('#alert_message').text("Category Deleted");
+                    $('#alertModal').modal('show');
                     categoryData.ajax.reload();
                 }
             })
