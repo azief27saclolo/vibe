@@ -21,6 +21,25 @@ $inventory->checkLogin();
 			<div class="col-lg-12">
 				<div class="card card-default rounded-0 shadow">
                     <div class="card-header">
+
+                    <div class="card-body">
+					<div id="alertModal" class="modal fade" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Message</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="alert_message"></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     	<div class="row">
                             <div class="col-lg-10 col-md-10 col-sm-8 col-xs-6">
                             	<h3 class="card-title">Services List</h3>
@@ -30,6 +49,7 @@ $inventory->checkLogin();
                             </div>
                         </div>
                     </div>
+
                     <div class="card-body">
                         <div class="row"><div class="col-sm-12 table-responsive">
                             <table id="servicesList" class="table table-bordered table-striped">
@@ -60,18 +80,20 @@ $inventory->checkLogin();
                                 
 								<div class="form-group">
                                     <label>Service Name </label>
-                                    <input type="text" name="service_name" id="service_name" class="form-control rounded-0 required"  />
+                                    <input type="text" name="service_name" id="service_name" class="form-control rounded-0 " required />
                                 </div>
 
                                 <div class="form-group">
                                     <label>Service Price</span></label>
-                                    <input type="number" name="service_price" id="service_price" class="form-control rounded-0 required"  />
+                                    <input type="number" name="service_price" id="service_price" class="form-control rounded-0"   required/>
 
                                 </div>
 
                             </form>
                         </div>
-
+                        <div class="modal-body">
+                                    <p id="alert_message"></p>
+                                </div>
                         <div class="modal-footer">
                             <input type="submit" name="action" id="action" class="btn btn-primary rounded-0 btn-sm" value="Add" form="servicesForm"/>
                             <button type="button" class="btn btn-default border rounded-0 btn-sm" data-bs-dismiss="modal">Close</button>

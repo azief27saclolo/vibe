@@ -5,6 +5,7 @@ $(document).ready(function() {
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Brand");
         $('#action').val('Add');
         $('#btn_action').val('addBrand');
+        $('.text-danger').remove();
     });
 
     var branddataTable = $('#brandList').DataTable({
@@ -32,16 +33,30 @@ $(document).ready(function() {
     $(document).on('submit', '#brandForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);
         var formData = $(this).serialize();
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
             success: function(data) {
-                $('#brandForm')[0].reset();
-                $('#brandModal').modal('hide');
-                $('#action').attr('disabled', false);
-                branddataTable.ajax.reload();
+                if (data <= 0) {
+                    if ($('#bname').next('.text-danger').length === 0) {
+                        $('#bname').after('<span class="text-danger">This brand name is already registered.</span>');
+                    } else {
+                        $('#bname').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                } else if(data > 0 ) {
+                    $('#brandForm')[0].reset();
+                    $('#brandModal').modal('hide');
+                    $('#alert_message').text('Brand Updated');
+                    $('#alertModal').modal('show');
+                    $('#action').attr('disabled', false);
+                    branddataTable.ajax.reload();
+                }
+               
             }
         })
     });
@@ -61,6 +76,7 @@ $(document).ready(function() {
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Brand");
                 $('#id').val(id);
                 $('#action').val('Edit');
+                $('.text-danger').remove();
                 $('#btn_action').val('updateBrand');
             }
         })
@@ -76,9 +92,12 @@ $(document).ready(function() {
                 method: "POST",
                 data: { id: id, status: status, btn_action: btn_action },
                 success: function(data) {
+                    $('#alert_message').text('Brand Deleted');
+                    $('#alertModal').modal('show');
                     branddataTable.ajax.reload();
                 }
             })
+            
         } else {
             return false;
         }

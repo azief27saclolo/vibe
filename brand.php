@@ -20,6 +20,25 @@ $inventory->checkLogin();
 		<div class="col-lg-12">
 			<div class="card card-default rounded-0 shadow">
                 <div class="card-header">
+					
+				<div class="card-body">
+					<div id="alertModal" class="modal fade" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Message</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p id="alert_message"></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 	<div class="row">
                 		<div class="col-md-9">
                 			<h3 class="card-title">Brand List</h3>
@@ -52,6 +71,7 @@ $inventory->checkLogin();
 						<h4 class="modal-title"><i class="fa fa-plus"></i> Add Brand</h4>
     					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
     				</div>
+					
     				<div class="modal-body">
     					<form method="post" id="brandForm">
     					<input type="hidden" name="id" id="id" />
@@ -68,6 +88,7 @@ $inventory->checkLogin();
 							</div>
     					</form>
     				</div>
+					
     				<div class="modal-footer">
     					<input type="submit" name="action" id="action" class="btn btn-primary btn-sm rounded-0" value="Add" form="brandForm"/>
     					<button type="button" class="btn btn-default btn-sm rounded-0" data-bs-dismiss="modal">Close</button>

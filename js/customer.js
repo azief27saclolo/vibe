@@ -32,6 +32,9 @@ $(document).ready(function() {
     $(document).on('submit', '#customerForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);
         var formData = $(this).serialize();
         $.ajax({
             url: "action.php",
@@ -39,16 +42,15 @@ $(document).ready(function() {
             data: formData,
             success: function(data) {
                 if (data <= 0) {
-                    $('#action').attr('disabled', false);
                     if ($('#mobile').next('.text-danger').length === 0) {
                         $('#mobile').after('<span class="text-danger">This mobile number is already registered.</span>');
                     } else {
                         $('#mobile').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
                     }
-                } else if(data > 0) {
+                } else if(data > 0 ) {
                     $('#customerForm')[0].reset();
                     $('#customerModal').modal('hide');
-                    $('#alert_message').text('Customer Added');
+                    $('#alert_message').text('Customer Updated');
                     $('#alertModal').modal('show');
                     $('#action').attr('disabled', false);
                     userdataTable.ajax.reload();
@@ -97,24 +99,5 @@ $(document).ready(function() {
         }
     });
 
-    $('#mobile').on('input', function() {
-        var mobile = $(this).val();
-        var userid = $('#userid').val();
-        $.ajax({
-            url: "action.php",
-            method: "POST",
-            data: { action: 'checkDuplicateMobile', mobile: mobile, userid: userid },
-            success: function(data) {
-                if (data === 'duplicate') {
-                    $('#mobile').next('.text-danger').remove();
-                    $('#mobile').after('<span class="text-danger">This mobile number is already registered.</span>');
-                    $('#action').attr('disabled', true);
-                } else {
-                    $('#mobile').next('.text-danger').remove();
-                    $('#action').attr('disabled', false);
-                }
-            }
-        });
-    });
 
 });

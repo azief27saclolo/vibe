@@ -132,14 +132,14 @@ class Inventory {
         $sqlCheck = "SELECT * FROM ".$this->customerTable." WHERE mobile = '".$_POST['mobile']."' AND id != '".$_POST['userid']."'";
         $result = mysqli_query($this->dbConnect, $sqlCheck);
         if (mysqli_num_rows($result) > 0) {
-            echo 'duplicate';
+            echo '0';
         } else {
             $sqlInsert = "
                 UPDATE ".$this->customerTable." 
                 SET name = '".$_POST['cname']."', address= '".$_POST['address']."', mobile = '".$_POST['mobile']."' 
                 WHERE id = '".$_POST['userid']."'";
             mysqli_query($this->dbConnect, $sqlInsert);
-            echo 'Customer Edited';
+            echo '1';
         }
     }
 }	
@@ -278,10 +278,19 @@ class Inventory {
 	}
 	public function saveBrand() {		
 		$sqlInsert = "
+			SELECT bname FROM ".$this->brandTable." WHERE bname = '".$_POST['bname']."'";		
+			$result = mysqli_query($this->dbConnect, $sqlInsert);
+
+			if($result->num_rows > 0) {
+				echo '0';
+		}else{
+			$sqlInsert = "
 			INSERT INTO ".$this->brandTable."(categoryid, bname) 
 			VALUES ('".$_POST["categoryid"]."', '".$_POST['bname']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		echo 'New Brand Added';
+			mysqli_query($this->dbConnect, $sqlInsert);
+			echo '1';
+		}
+		
 	}	
 	public function getBrand(){
 		$sqlQuery = "
@@ -292,11 +301,19 @@ class Inventory {
 		echo json_encode($row);
 	}	
 	public function updateBrand() {		
-		if($_POST['id']) {	
-			$sqlUpdate = "UPDATE ".$this->brandTable." SET bname = '".$_POST['bname']."', categoryid='".$_POST['categoryid']."' WHERE id = '".$_POST["id"]."'";
-			mysqli_query($this->dbConnect, $sqlUpdate);	
-			echo 'Brand Update';
-		}	
+		$sqlInsert = "
+			SELECT bname FROM ".$this->brandTable." WHERE bname = '".$_POST['bname']."' AND id != '".$_POST['id']."'";		
+			$result = mysqli_query($this->dbConnect, $sqlInsert);
+
+		if($result->num_rows > 0) {
+			echo '0';
+		}else{
+			if($_POST['id']) {	
+				$sqlUpdate = "UPDATE ".$this->brandTable." SET bname = '".$_POST['bname']."', categoryid='".$_POST['categoryid']."' WHERE id = '".$_POST["id"]."'";
+				mysqli_query($this->dbConnect, $sqlUpdate);	
+				echo '1';
+			}
+		}
 	}	
 	public function deleteBrand(){
 		$sqlQuery = "
@@ -1113,12 +1130,26 @@ class Inventory {
 		
 		if($_POST['service_name'] && $_POST['service_price']){
 			$sqlInsert = "
+				SELECT * FROM ".$this->servicesTable." WHERE service_name = '".$_POST['service_name']."'";		
+			$result = mysqli_query($this->dbConnect, $sqlInsert);
+			
+			if(mysqli_num_rows($result) > 0){
+				echo '0';
+			}else{
+				
+				$sqlInsert = "
 				INSERT INTO ".$this->servicesTable."(service_name, service_price) 
 				VALUES ('".$_POST['service_name']."', '".$_POST['service_price']."')";		
-			mysqli_query($this->dbConnect, $sqlInsert);
-			echo 'New order added';
+				$success = mysqli_query($this->dbConnect, $sqlInsert);
+				if($success) {
+					        echo '1';
+					    } else {
+					        echo '0';
+					    }
+							
+				}
 		}
-			
+
 	}
 
 	public function listServices() {
@@ -1184,12 +1215,28 @@ class Inventory {
 
     public function updateServices() {
         if($_POST['services_id']) {    
-            $sqlUpdate = "
+			$sqlInsert = "
+				SELECT * FROM ".$this->servicesTable." WHERE service_name = '".$_POST['service_name']."'
+				AND service_id != '".$_POST['services_id']."'";   	
+			$result = mysqli_query($this->dbConnect, $sqlInsert);
+			
+			if(mysqli_num_rows($result) > 0){
+				echo '0';
+			}else{
+				
+				$sqlUpdate = "
                 UPDATE ".$this->servicesTable." 
                 SET service_name = '".$_POST['service_name']."', service_price = '".$_POST['service_price']."' 
                 WHERE service_id = '".$_POST['services_id']."'";        
-            mysqli_query($this->dbConnect, $sqlUpdate);    
-            echo 'Service Updated';
+				$success =  mysqli_query($this->dbConnect, $sqlUpdate);    
+				
+				if($success) {
+					        echo '1';
+					    } else {
+					        echo '0';
+					    }
+							
+				}
         }    
     }
 
@@ -1274,7 +1321,7 @@ public function deleteServiceAvailed() {
     mysqli_query($this->dbConnect, $sqlQuery);
     echo 'Service Availed Deleted';
 }
-
+//ADD the debug in save and update service===============================================================================================================
 public function getCustomerListDropdown() {
     $sqlQuery = "SELECT id, name FROM ".$this->customerTable." ORDER BY name ASC";
     $result = mysqli_query($this->dbConnect, $sqlQuery);

@@ -29,23 +29,38 @@ $(document).ready(function() {
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Services");
         $('#action').val("Add");
         $('#btn_action').val("addServices");
+        $('.text-danger').remove();
     });
 
     $(document).on('submit', '#servicesForm', function(event) {
+        
         event.preventDefault();
-        console.log('Add    Services fomr clicked');
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);
         var formData = $(this).serialize();
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
             success: function(data) {
-                console.log('Im in Submit');
-                $('#servicesForm')[0].reset();
-                $('#servicesModal').modal('hide');
-                $('#action').attr('disabled', false);
-                servicesData.ajax.reload();
+                if (data <= 0) {
+                    if ($('#service_name').next('.text-danger').length === 0) {
+                        $('#service_name').after('<span class="text-danger">This brand name is already registered.</span>');
+                    } else {
+                        $('#service_name').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                } else if(data > 0 ) {
+                    $('#alert_message').text('Service Updated');
+                    $('#alertModal').modal('show');
+                    console.log('Im in Submit');
+                    $('#servicesForm')[0].reset();
+                    $('#servicesModal').modal('hide');
+                    $('#action').attr('disabled', false);
+                    servicesData.ajax.reload();
+                }
+                
             }
         })
     });
@@ -61,13 +76,10 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log('Im in Delete');
                     console.log('Response:', data); // Log the response from the server
+                    $('#alert_message').text('Service Deleted');
+                    $('#alertModal').modal('show');
                     servicesData.ajax.reload();
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    console.error('Status:', status);
-                    console.error('Response:', xhr.responseText);
-                }
             });
         } else {
             return false;
@@ -89,8 +101,10 @@ $(document).ready(function() {
                 $('#service_price').val(data.service_price);
                 $('.modal-title').html("<i class='fa fa-edit'></i> Update Service");
                 $('#services_id').val(services_id);
+                $('.text-danger').remove();
                 $('#action').val('Update');
                 $('#btn_action').val("updateServices");
+
             }
         })
     });
