@@ -5,6 +5,7 @@ $(document).ready(function() {
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Customer");
         $('#action').val("Add");
         $('#btn_action').val("addSupplier");
+        $('.text-danger').remove(); // Remove error messages
     });
     var supplierDataTable = $('#supplierList').DataTable({
         "lengthChange": false,
@@ -18,30 +19,53 @@ $(document).ready(function() {
             dataType: "json"
         },
         "columnDefs": [{
-            "target": [0, 5],
+            "target": [0, 4],
             "orderable": false
         }],
         "pageLength": 25,
         'rowCallback': function(row, data, index) {
             $(row).find('td').addClass('align-middle')
-            $(row).find('td:eq(0), td:eq(4), td:eq(5)').addClass('text-center')
+            $(row).find('td:eq(0), td:eq(3), td:eq(4)').addClass('text-center')
         },
     });
 
     $(document).on('submit', '#supplierForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);
         var formData = $(this).serialize();
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
             success: function(data) {
-                $('#supplierForm')[0].reset();
-                $('#supplierModal').modal('hide');
-                $('#alert_action').fadeIn().html('<div class="alert alert-success">' + data + '</div>');
-                $('#action').attr('disabled', false);
-                supplierDataTable.ajax.reload();
+                if (data == 1) {
+                    $('.text-danger').remove(); // Remove error messages
+                    if ($('#mobile').next('.text-danger').length === 0) {
+                        $('#mobile').after('<span class="text-danger">This mobile number is already registered.</span>');
+                    } else {
+                        $('#mobile').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                } 
+                if(data <= 0 ) {
+                    $('.text-danger').remove(); // Remove error messages
+                    if ($('#supplier_name').next('.text-danger').length === 0) {
+                        $('#supplier_name').after('<span class="text-danger">This supplier is already existed.</span>');
+                    } else {
+                        $('#supplier_name').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                }
+                 if(data == 2){
+                    $('#supplierForm')[0].reset();
+                    $('#supplierModal').modal('hide');
+                    $('#action').attr('disabled', false);
+                    supplierDataTable.ajax.reload();
+                    $('#alert_message').text('Supplier Updated');
+                    $('#alertModal').modal('show');
+                }
+                
             }
         })
     });
@@ -63,6 +87,7 @@ $(document).ready(function() {
                 $('#supplier_id').val(supplier_id);
                 $('#action').val('Update');
                 $('#btn_action').val('updateSupplier');
+                $('.text-danger').remove(); // Remove error messages
             }
         })
     });

@@ -609,18 +609,11 @@ class Inventory {
 		$supplierData = array();	
 		$increment = 1;
 		while( $supplier = mysqli_fetch_assoc($result) ) {	
-			$status = '';
-			if($supplier['status'] == 'active') {
-				$status = '<span class="label label-success">Active</span>';
-			} else {
-				$status = '<span class="label label-danger">Inactive</span>';
-			}
 			$supplierRows = array();
 			$supplierRows[] = $increment++;
 			$supplierRows[] = $supplier['supplier_name'];	
 			$supplierRows[] = $supplier['mobile'];			
 			$supplierRows[] = $supplier['address'];	
-			$supplierRows[] = $status;			
 			$supplierRows[] = '<div class="btn-group btn-group-sm"><button type="button" name="update" id="'.$supplier["supplier_id"].'" class="btn btn-primary btn-sm rounded-0  update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$supplier["supplier_id"].'" class="btn btn-danger btn-sm rounded-0  delete"  title="Delete"><i class="fa fa-trash"></i></button></div>';
 			$supplierData[] = $supplierRows;
 		}
@@ -632,12 +625,32 @@ class Inventory {
 		);
 		echo json_encode($output);
 	}
-	public function addSupplier() {		
+	public function addSupplier() {	
 		$sqlInsert = "
-			INSERT INTO ".$this->supplierTable."(supplier_name, mobile, address) 
-			VALUES ('".$_POST['supplier_name']."', '".$_POST['mobile']."', '".$_POST['address']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		echo 'New Supplier Added';
+			SELECT * FROM ".$this->supplierTable."
+			WHERE supplier_name = '".$_POST['supplier_name']."'";		
+		$result = mysqli_query($this->dbConnect, $sqlInsert);
+
+		$sqlInsert2 = "
+			SELECT * FROM ".$this->supplierTable."
+			WHERE mobile = '".$_POST['mobile']."'";		
+		$result2 = mysqli_query($this->dbConnect, $sqlInsert2);
+
+		if(mysqli_num_rows($result) > 0) {
+			echo '0';
+		}
+		else if(mysqli_num_rows($result2) > 0){
+			echo '1';
+		}
+		
+		if(mysqli_num_rows($result) <= 0 && mysqli_num_rows($result2) <= 0){
+			$sqlInsert = "
+				INSERT INTO ".$this->supplierTable."(supplier_name, mobile, address) 
+				VALUES ('".$_POST['supplier_name']."', '".$_POST['mobile']."', '".$_POST['address']."')";		
+			mysqli_query($this->dbConnect, $sqlInsert);
+			echo '2';
+		}
+	
 	}			
 	public function getSupplier(){
 		$sqlQuery = "
@@ -649,11 +662,33 @@ class Inventory {
 	}
 	public function updateSupplier() {
 		if($_POST['supplier_id']) {	
+			$sqlInsert = "
+			SELECT * FROM ".$this->supplierTable."
+			WHERE supplier_name = '".$_POST['supplier_name']."'
+			AND supplier_id != '".$_POST['supplier_id']."'";		
+		$result = mysqli_query($this->dbConnect, $sqlInsert);
+
+		$sqlInsert2 = "
+			SELECT * FROM ".$this->supplierTable."
+			WHERE mobile = '".$_POST['mobile']."'
+			AND supplier_id != '".$_POST['supplier_id']."'";		
+		$result2 = mysqli_query($this->dbConnect, $sqlInsert2);
+
+		if(mysqli_num_rows($result) > 0) {
+			echo '0';
+		}
+		else if(mysqli_num_rows($result2) > 0){
+			echo '1';
+		}
+		
+		if(mysqli_num_rows($result) <= 0 && mysqli_num_rows($result2) <= 0){
 			$sqlUpdate = "
 				UPDATE ".$this->supplierTable." 
 				SET supplier_name = '".$_POST['supplier_name']."', mobile= '".$_POST['mobile']."' , address= '".$_POST['address']."'	WHERE supplier_id = '".$_POST['supplier_id']."'";		
 			mysqli_query($this->dbConnect, $sqlUpdate);	
-			echo 'Supplier Edited';
+			echo '2';
+
+		}
 		}	
 	}	
 	public function deleteSupplier(){
