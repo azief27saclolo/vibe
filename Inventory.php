@@ -423,9 +423,12 @@ class Inventory {
         SELECT * FROM ".$this->productTable."
 		WHERE pname = '".$_POST['pname']."'";		
 		$result = mysqli_query($this->dbConnect, $sqlInsert);
+
 		if(mysqli_num_rows($result) > 0) {
 			echo '0';
-		}else{
+		}elseif($_POST['base_price'] >= $_POST['selling_price']){
+			echo '2';
+		}elseif(mysqli_num_rows($result) <= 0){
 
 			$sqlInsert = "
 				INSERT INTO ".$this->productTable."(categoryid, brandid, pname, description, quantity, base_price, selling_price, minimum_order, supplier) 
@@ -486,7 +489,9 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlInsert);
 		if(mysqli_num_rows($result) > 0) {
 			echo '0';
-		}else{
+		}elseif($_POST['base_price'] >= $_POST['selling_price']){
+			echo '2';
+		}elseif(mysqli_num_rows($result) <= 0){
 				if($_POST['pid']) {	
 					$sqlUpdate = "UPDATE ".$this->productTable." 
 						SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
@@ -1028,15 +1033,11 @@ class Inventory {
 			if(!$inventory['recieved_quantity']) {
 				$inventory['recieved_quantity'] = 0;
 			}
-
-			$inventoryInHand = ($inventory['product_quantity']  - $inventory['total_sell']);
 			$inventoryRow = array();
 			$inventoryRow[] = $i++;
 			$inventoryRow[] = "<div class='lh-1'><div>{$inventory['pname']}</div><div class='fw-bolder text-muted'</div></div>";
-			$inventoryRow[] = $inventory['product_quantity'] - $inventory['recieved_quantity'];
-			$inventoryRow[] = $inventory['recieved_quantity'];	
+			$inventoryRow[] = $inventory['product_quantity'];
 			$inventoryRow[] = $inventory['total_sell'];
-			$inventoryRow[] = $inventoryInHand;			
 			$inventoryData[] = $inventoryRow;						
 		}
 		$output = array(

@@ -31,10 +31,8 @@ $inventory->checkLogin();
 									<tr>
 										<th>ID</th>
 										<th>Product/Code</th>
-										<th>Starting Inventory</th>
-										<th>Inventory Received</th>
-										<th>Inventory Sold</th>
-										<th>Inventory on Hand</th>
+										<th>In Stock</th>
+										<th>Sold</th>
 									</tr>
 							</thead>
                         </table>

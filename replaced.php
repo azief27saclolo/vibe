@@ -35,7 +35,7 @@ $inventory->checkLogin();
                             <table id="replacedList" class="table table-bordered table-striped">
                                 <thead><tr>
                                     <th>ID</th>      
-									<th>Product Name</th>	
+									<th>Phone Name</th>	
 									<th>Replacement list</th>									
                                     <th>Quantity</th>
                                     <th>Action</th>
