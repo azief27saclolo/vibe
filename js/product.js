@@ -12,7 +12,7 @@ $(document).ready(function() {
             dataType: "json"
         },
         "columnDefs": [{
-            "targets": [0, 11], // Update the target to match the correct number of columns
+            "targets": [0, 10], // Update the target to match the correct number of columns
             "orderable": false,
         }],
         "pageLength": 10,
@@ -29,6 +29,7 @@ $(document).ready(function() {
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Product");
         $('#action').val("Add");
         $('#btn_action').val("addProduct");
+        $('.text-danger').remove(); // Remove error messages
     });
 
     $(document).on('change', '#categoryid', function() {
@@ -89,16 +90,28 @@ $(document).ready(function() {
             method: "POST",
             data: formData,
             success: function(data) {
-            $('#productForm')[0].reset();
-            $('#productModal').modal('hide');
-            $('#action').attr('disabled', false);
-            productData.ajax.reload();
+                if (data <= 0) {
+                    if ($('#pname').next('.text-danger').length === 0) {
+                        $('#pname').after('<span class="text-danger">This product is already existed.</span>');
+                    } else {
+                        $('#pname').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                } else if(data > 0 ) {
+                    $('#alert_message').text('Product Updated');
+                    $('#alertModal').modal('show');
+                    $('#productForm')[0].reset();
+                    $('#productModal').modal('hide');
+                    $('#action').attr('disabled', false);
+                    productData.ajax.reload();
 
-            // Remove buttons in #part_select
-            $('#part_select .selected-part-button').remove();
+                    // Remove buttons in #part_select
+                    $('#part_select .selected-part-button').remove();
+                    
+                    // Restore all values in dropdown
+                    $('#categoryid').val('').trigger('change');
+                }
+
             
-            // Restore all values in dropdown
-            $('#categoryid').val('').trigger('change');
         }
     });
 });
@@ -141,7 +154,7 @@ $(document).ready(function() {
                 $('#pid').val(pid);
                 $('#action').val("Edit");
                 $('#btn_action').val("updateProduct");
-                
+                $('.text-danger').remove(); // Remove error messages
                 // Show "Part Replaced" section if category is Phone
                 if ($('#categoryid option:selected').text() === "Phone") {
                     $('#part_select').removeClass('hidden');

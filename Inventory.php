@@ -364,12 +364,6 @@ class Inventory {
 		$productData = array();	
 		$increment = 1;
 		while( $product = mysqli_fetch_assoc($result) ) {			
-			$status = '';
-			if($product['status'] == 'active') {
-				$status = '<span class="label label-success">Active</span>';
-			} else {
-				$status = '<span class="label label-danger">Inactive</span>';
-			}
 
 			// Fetch parts replaced
 			$sqlPartsQuery = "
@@ -395,8 +389,7 @@ class Inventory {
 			$productRow[] = $product["selling_price"];
 			$productRow[] = $product['supplier_name'];
 			$productRow[] = $partsReplacedHtml; // Add parts replaced column
-			$productRow[] = $status;
-			$productRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="view" id="'.$product["pid"].'" class="btn btn-light bg-gradient border text-dark btn-sm rounded-0  view" title="View"><i class="fa fa-eye"></i></button><button type="button" name="update" id="'.$product["pid"].'" class="btn btn-primary btn-sm rounded-0  update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$product["pid"].'" class="btn btn-danger btn-sm rounded-0  delete" data-status="'.$product["status"].'" title="Delete"><i class="fa fa-trash"></i></button></div>';
+			$productRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="view" id="'.$product["pid"].'" class="btn btn-light bg-gradient border text-dark btn-sm rounded-0  view" title="View"><i class="fa fa-eye"></i></button><button type="button" name="update" id="'.$product["pid"].'" class="btn btn-primary btn-sm rounded-0  update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$product["pid"].'" class="btn btn-danger btn-sm rounded-0  delete" title="Delete"><i class="fa fa-trash"></i></button></div>';
 			$productData[] = $productRow;
 		}
 		$outputData = array(
@@ -418,32 +411,41 @@ class Inventory {
 		return $dropdownHTML;
 	}
 	public function supplierDropdownList(){	
-		$sqlQuery = "SELECT * FROM ".$this->supplierTable." 
-			WHERE status = 'active'	ORDER BY supplier_name ASC";
+		$sqlQuery = "SELECT * FROM ".$this->supplierTable."";
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$dropdownHTML = '';
-		$increment = 1;
 		while( $supplier = mysqli_fetch_assoc($result) ) {	
-			$dropdownHTML .= '<option value="'.$supplier["supplier_id"].'">'.$supplier["supplier_name"].'</option>';
+			$dropdownHTML .= '<option value="'.$supplier["supplier_id"].'">'.$supplier["supplier_name"].':</option>';
 		}
 		return $dropdownHTML;
 	}
 	public function addProduct() {		
-    $sqlInsert = "
-        INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, selling_price, minimum_order, supplier) 
-        VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', 1, '".$_POST['supplierid']."')";		
-    mysqli_query($this->dbConnect, $sqlInsert);
-    $productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
+		$sqlInsert = "
+        SELECT * FROM ".$this->productTable."
+		WHERE pname = '".$_POST['pname']."'";		
+		$result = mysqli_query($this->dbConnect, $sqlInsert);
+		if(mysqli_num_rows($result) > 0) {
+			echo '0';
+		}else{
 
-    // Insert selected parts
-    if (!empty($_POST['selected_parts'])) {
-        foreach ($_POST['selected_parts'] as $partId) {
-            $sqlInsertPart = "
-                INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
-                VALUES ('".$productId."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
-            mysqli_query($this->dbConnect, $sqlInsertPart);
-        }
-    }
+			$sqlInsert = "
+				INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, selling_price, minimum_order, supplier) 
+				VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', 1, '".$_POST['supplierid']."')";		
+			mysqli_query($this->dbConnect, $sqlInsert);
+			$productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
+		
+			// Insert selected parts
+			if (!empty($_POST['selected_parts'])) {
+				foreach ($_POST['selected_parts'] as $partId) {
+					$sqlInsertPart = "
+						INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
+						VALUES ('".$productId."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
+					mysqli_query($this->dbConnect, $sqlInsertPart);
+				}
+			}
+
+			echo '1';
+    	}
 
 
     echo 'New Product Added';
