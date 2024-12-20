@@ -29,22 +29,36 @@ $(document).ready(function() {
         $('.modal-title').html("<i class='fa fa-plus'></i> Add Replace");
         $('#action').val("Add");
         $('#btn_action').val("addReplaced");
+        $('.text-danger').remove(); // Remove error messages
+        
     });
 
     $(document).on('submit', '#replacedForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);   
         var formData = $(this).serialize();
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
             success: function(data) {
-                console.log('Im in Submit');
-                $('#replacedForm')[0].reset();
-                $('#replacedModal').modal('hide');
-                $('#action').attr('disabled', false);
-                replacedData.ajax.reload();
+                if(data <= 0) {
+                    if ($('#quantity').next('.text-danger').length === 0) {
+                        $('#quantity').after('<span class="text-danger">The Quantity is Exceeded than the Stock.</span>');
+                    } else {
+                        $('#quantity').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                
+                }else if(data > 0){
+                    $('#replacedForm')[0].reset();
+                    $('#replacedModal').modal('hide');
+                    $('#action').attr('disabled', false);
+                    refreshPartsDropdown();
+                    replacedData.ajax.reload();
+                }
             }
         })
     });
@@ -58,6 +72,7 @@ $(document).ready(function() {
                 method: "POST",
                 data: { replaced_id: replaced_id, btn_action: btn_action },
                 success: function(data) {
+                    refreshPartsDropdown();
                     replacedData.ajax.reload();
                 }
             });
@@ -80,10 +95,9 @@ $(document).ready(function() {
                     alert(data.error);
                     return;
                 }
-    
+                refreshPartsDropdown();
                 // Open the modal
                 $('#replacedModal').modal('show');
-    
                 // Set the form fields with the returned data
                 $('#replacement_id').val(data.replacement_id);
                 $('#quantity').val(data.quantity);
@@ -96,10 +110,19 @@ $(document).ready(function() {
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Replace");
                 $('#action').val("Edit");
                 $('#btn_action').val("updateReplaced");
+                $('.text-danger').remove(); // Remove error messages
             }
         });
     });
     
-    
-
+    function refreshPartsDropdown() {
+        $.ajax({
+            url: "replaced.php",
+            method: "POST",
+            data: { action: 'getPartsDropdown' },
+            success: function(data) {
+                location.reload();
+            }
+        });
+    }
 });

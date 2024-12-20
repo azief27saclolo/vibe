@@ -1073,19 +1073,41 @@ class Inventory {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$dropdownHTML = '';
 		while( $product = mysqli_fetch_assoc($result) ) {	
-			$dropdownHTML .= '<option value="'.$product["pid"].'">'.$product["pname"].'</option>';
+			$dropdownHTML .= '<option value="'.$product["pid"].'">'.$product["pname"]." (".$product["quantity"] .') </option>';
 		}
 		return $dropdownHTML;
 	}
 	
 	public function addReplaced() {
-		$sqlInsert = "
-			INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, 	quantity) 
-			VALUES ('".$_POST['phone']."', '".$_POST['part']."', '".$_POST['quantity']."')";		
-		mysqli_query($this->dbConnect, $sqlInsert);
-		echo 'New order added';
+		// Query to get the quantity of the product
+		$sqlSelect = "
+			SELECT quantity FROM ".$this->productTable." WHERE pid = '".$_POST['part']."' LIMIT 1";		
+		$result = mysqli_query($this->dbConnect, $sqlSelect);
+		
+		if ($result) {
+			$row = mysqli_fetch_assoc($result);
+			$quantity = $row['quantity'];
+			
+			// Check if the quantity is sufficient before inserting the replacement
+			if ($quantity >= $_POST['quantity']) {
+				$sqlInsert = "
+					INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
+					VALUES ('".$_POST['phone']."', '".$_POST['part']."', '".$_POST['quantity']."')";		
+				if (mysqli_query($this->dbConnect, $sqlInsert)) {
+					// Subtract the quantity from the product table
+					$sqlUpdate = "
+						UPDATE ".$this->productTable."
+						SET quantity = quantity - '".$_POST['quantity']."'
+						WHERE pid = '".$_POST['part']."'";
+					mysqli_query($this->dbConnect, $sqlUpdate);
+					echo '1';
+				}
+			} else {
+				echo '0';
+			}
+		} 
 	}
-	
+		
 
 	
 	public function listReplaced() {
@@ -1149,10 +1171,31 @@ class Inventory {
 	
 	
 	public function deleteReplaced(){
+		$sqlQuery2 = "SELECT quantity, 	part_pid 
+					FROM ".$this->replacedTable." 
+					WHERE replacement_id = '".$_POST["replaced_id"]."'";
+				$result = 	mysqli_query($this->dbConnect, $sqlQuery2);
+				$row = mysqli_fetch_assoc($result);
+				$quantity = $row['quantity'];
+				$part_id = $row['part_pid'];
+
 		$sqlQuery = "
 			DELETE FROM ".$this->replacedTable." 
 			WHERE replacement_id = '".$_POST["replaced_id"]."'";	
-		mysqli_query($this->dbConnect, $sqlQuery);			
+		if(mysqli_query($this->dbConnect, $sqlQuery)){
+		
+			$sqlUpdate = "
+				UPDATE ".$this->productTable." 
+				SET quantity = quantity + '". $quantity ."'
+				WHERE pid = '". $part_id ."'";
+			if(mysqli_query($this->dbConnect, $sqlUpdate)){
+				echo '1';
+			}else{
+				echo '0';
+			}
+
+		}		
+
 	}
 
 	public function getReplacedDetails(){
@@ -1166,14 +1209,61 @@ class Inventory {
 
 
 	public function updateReplaced() {
-		if($_POST['replacement_id']) {	
-			$sqlUpdate = "
+		if ($_POST['replacement_id']) {
+			// Fetch the current quantity of the part
+			$sqlSelectPart = "
+				SELECT quantity 
+				FROM ".$this->productTable." 
+				WHERE pid = '".$_POST['part']."' 
+				LIMIT 1";
+			$resultPart = mysqli_query($this->dbConnect, $sqlSelectPart);
+			$partRow = mysqli_fetch_assoc($resultPart);
+			$partQuantity = $partRow['quantity'];
+	
+			// Fetch the current quantity of the replacement
+			$sqlSelectReplacement = "
+				SELECT quantity 
+				FROM ".$this->replacedTable." 
+				WHERE replacement_id = '".$_POST['replacement_id']."' 
+				LIMIT 1";
+			$resultReplacement = mysqli_query($this->dbConnect, $sqlSelectReplacement);
+			$replacementRow = mysqli_fetch_assoc($resultReplacement);
+			$currentReplacementQuantity = $replacementRow['quantity'];
+	
+			// Calculate the difference
+			$newReplacementQuantity = $_POST['quantity'];
+			$quantityDifference = $newReplacementQuantity - $currentReplacementQuantity;
+	
+			// Check if the part can accommodate the increased quantity
+			if ($quantityDifference > 0 && $partQuantity >= $quantityDifference) {
+				// Subtract the added quantity from the part
+				$sqlUpdatePart = "
+					UPDATE ".$this->productTable." 
+					SET quantity = quantity - '".$quantityDifference."' 
+					WHERE pid = '".$_POST['part']."'";
+				mysqli_query($this->dbConnect, $sqlUpdatePart);
+			} elseif ($quantityDifference < 0) {
+				// Add the decreased quantity to the part
+				$sqlUpdatePart = "
+					UPDATE ".$this->productTable." 
+					SET quantity = quantity + '".abs($quantityDifference)."' 
+					WHERE pid = '".$_POST['part']."'";
+				mysqli_query($this->dbConnect, $sqlUpdatePart);
+			} elseif ($quantityDifference > 0 && $partQuantity < $quantityDifference) {
+				echo '0';
+				return;
+			}
+	
+			// Update the replacement record
+			$sqlUpdateReplacement = "
 				UPDATE ".$this->replacedTable." 
-				SET phone_pid  = '".$_POST['phone']."', part_pid= '".$_POST['part']."' , quantity= '".$_POST['quantity']."'	WHERE replacement_id = '".$_POST['replacement_id']."'";		
-			mysqli_query($this->dbConnect, $sqlUpdate);	
-			echo 'Replaced Edited';
-		}	
-	}	
+				SET phone_pid = '".$_POST['phone']."', part_pid = '".$_POST['part']."', quantity = '".$_POST['quantity']."' 
+				WHERE replacement_id = '".$_POST['replacement_id']."'";
+			mysqli_query($this->dbConnect, $sqlUpdateReplacement);
+	
+			echo '1';
+		}
+	}
 
 
 
