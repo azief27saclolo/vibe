@@ -57,7 +57,6 @@ $inventory->checkLogin();
 									<th>Category</th>	
 									<th>Brand Name</th>									
                                     <th>Product Name</th>
-									<th>Product Model</th>
                                     <th>Quantity</th>
                                     <th>Base Price</th>
                                     <th>Selling Price</th>
@@ -100,10 +99,6 @@ $inventory->checkLogin();
                                 <div class="form-group">
                                     <label>Product Name</label>
                                     <input type="text" name="pname" id="pname" class="form-control rounded-0" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Product Model</label>
-                                    <input type="text" name="pmodel" id="pmodel" class="form-control rounded-0" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Product Description</label>

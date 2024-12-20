@@ -383,7 +383,6 @@ class Inventory {
 			$productRow[] = $product['category_name'];
 			$productRow[] = $product['bname'];
 			$productRow[] = $product['pname'];	
-			$productRow[] = $product['model'];			
 			$productRow[] = $product["quantity"];
 			$productRow[] = $product["base_price"];
 			$productRow[] = $product["selling_price"];
@@ -429,8 +428,8 @@ class Inventory {
 		}else{
 
 			$sqlInsert = "
-				INSERT INTO ".$this->productTable."(categoryid, brandid, pname, model, description, quantity, base_price, selling_price, minimum_order, supplier) 
-				VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['pmodel']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', 1, '".$_POST['supplierid']."')";		
+				INSERT INTO ".$this->productTable."(categoryid, brandid, pname, description, quantity, base_price, selling_price, minimum_order, supplier) 
+				VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', 1, '".$_POST['supplierid']."')";		
 			mysqli_query($this->dbConnect, $sqlInsert);
 			$productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
 		
@@ -443,12 +442,9 @@ class Inventory {
 					mysqli_query($this->dbConnect, $sqlInsertPart);
 				}
 			}
-
 			echo '1';
     	}
 
-
-    echo 'New Product Added';
 }	
 	public function getProductDetails(){
 		$sqlQuery = "
@@ -461,7 +457,6 @@ class Inventory {
 			$output['brandid'] = $product['brandid'];
 			$output["brand_select_box"] = $this->getCategoryBrand($product['categoryid']);
 			$output['pname'] = $product['pname'];
-			$output['model'] = $product['model'];
 			$output['description'] = $product['description'];
 			$output['quantity'] = $product['quantity'];
 			$output['base_price'] = $product['base_price'];
@@ -485,27 +480,36 @@ class Inventory {
 		echo json_encode($output);
 	}
 	public function updateProduct() {		
-        if($_POST['pid']) {	
-            $sqlUpdate = "UPDATE ".$this->productTable." 
-                SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', model='".$_POST['pmodel']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
-            mysqli_query($this->dbConnect, $sqlUpdate);
+		$sqlInsert = "
+        SELECT * FROM ".$this->productTable."
+		WHERE pname = '".$_POST['pname']."' AND pid != '".$_POST['pid']."'";		
+		$result = mysqli_query($this->dbConnect, $sqlInsert);
+		if(mysqli_num_rows($result) > 0) {
+			echo '0';
+		}else{
+				if($_POST['pid']) {	
+					$sqlUpdate = "UPDATE ".$this->productTable." 
+						SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
+					mysqli_query($this->dbConnect, $sqlUpdate);
 
-            // Remove existing replaced parts
-            $sqlDeleteParts = "DELETE FROM ".$this->replacedTable." WHERE phone_pid = '".$_POST["pid"]."'";
-            mysqli_query($this->dbConnect, $sqlDeleteParts);
+					// Remove existing replaced parts
+					$sqlDeleteParts = "DELETE FROM ".$this->replacedTable." WHERE phone_pid = '".$_POST["pid"]."'";
+					mysqli_query($this->dbConnect, $sqlDeleteParts);
 
-            // Insert updated replaced parts
-            if (!empty($_POST['selected_parts'])) {
-                foreach ($_POST['selected_parts'] as $partId) {
-                    $sqlInsertPart = "
-                        INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
-                        VALUES ('".$_POST["pid"]."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
-                    mysqli_query($this->dbConnect, $sqlInsertPart);
-                }
-            }
+					// Insert updated replaced parts
+					if (!empty($_POST['selected_parts'])) {
+						foreach ($_POST['selected_parts'] as $partId) {
+							$sqlInsertPart = "
+								INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
+								VALUES ('".$_POST["pid"]."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
+							mysqli_query($this->dbConnect, $sqlInsertPart);
+						}
+					}
 
-            echo 'Product Update';
-        }	
+					echo '1';
+				}	
+		}
+
     }	 
 	public function deleteProduct(){
 		$sqlQuery = "
@@ -533,10 +537,6 @@ class Inventory {
 			<tr>
 				<td>Product Name</td>
 				<td>'.$product["pname"].'</td>
-			</tr>
-			<tr>
-				<td>Product Model</td>
-				<td>'.$product["model"].'</td>
 			</tr>
 			<tr>
 				<td>Product Description</td>
@@ -1014,7 +1014,7 @@ class Inventory {
 		}		
 	}
 	public function getInventoryDetails(){		
-		$sqlQuery = "SELECT p.pid, p.pname, p.model, p.quantity as product_quantity, 
+		$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, 
 						(SELECT SUM(s.quantity) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid) as recieved_quantity, 
 						(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid) as total_sell
 					FROM ".$this->productTable." as p

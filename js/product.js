@@ -12,13 +12,13 @@ $(document).ready(function() {
             dataType: "json"
         },
         "columnDefs": [{
-            "targets": [0, 10], // Update the target to match the correct number of columns
+            "targets": [0, 9], // Update the target to match the correct number of columns
             "orderable": false,
         }],
         "pageLength": 10,
         'rowCallback': function(row, data, index) {
             $(row).find('td').addClass('align-middle')
-            $(row).find('td:eq(0), td:eq(9)').addClass('text-center') // Update the target to match the correct number of columns
+            $(row).find('td:eq(0), td:eq(8)').addClass('text-center') // Update the target to match the correct number of columns
         },
     });
 
@@ -78,8 +78,10 @@ $(document).ready(function() {
     $(document).on('submit', '#productForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
+        setTimeout(function() {
+            $('#action').attr('disabled', false);
+        }, 1000);
         var formData = $(this).serializeArray();
-        
         // Collect selected parts
         $('.selected-part-button').each(function() {
             formData.push({ name: 'selected_parts[]', value: $(this).data('part-id') });
@@ -144,7 +146,6 @@ $(document).ready(function() {
                 $('#brandid').html(data.brand_select_box);
                 $('#brandid').val(data.brandid);
                 $('#pname').val(data.pname);
-                $('#pmodel').val(data.model);
                 $('#description').val(data.description);
                 $('#quantity').val(data.quantity);
                 $('#base_price').val(data.base_price);
