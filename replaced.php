@@ -73,7 +73,6 @@ $inventory->checkLogin();
                                     <label>Part Name</label>
                                     <select name="part" id="part" class="form-select rounded-0" required>
                                         <option value="">Select Product</option>
-                                        <?php echo $inventory->partsDropdownList();?>
                                     </select>
                                 </div>
 

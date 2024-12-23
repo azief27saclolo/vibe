@@ -21,3 +21,8 @@ body {
 .hidden{
     display: none;
 }
+
+.flex-column{
+    display: flex;
+    flex-direction: column;
+}

@@ -33,6 +33,22 @@ $(document).ready(function() {
         
     });
 
+    $('#phone').change(function() {
+        var phoneId = $(this).val();
+        if (phoneId) {
+            $.ajax({
+                url: "action.php",
+                method: "POST",
+                data: { action: 'getAvailableParts', phone_id: phoneId },
+                success: function(data) {
+                    $('#part').html(data);
+                }
+            });
+        } else {
+            $('#part').html('<option value="">Select Product</option>');
+        }
+    });
+
     $(document).on('submit', '#replacedForm', function(event) {
         event.preventDefault();
         $('#action').attr('disabled', 'disabled');
@@ -56,7 +72,7 @@ $(document).ready(function() {
                     $('#replacedForm')[0].reset();
                     $('#replacedModal').modal('hide');
                     $('#action').attr('disabled', false);
-                    refreshPartsDropdown();
+                    
                     replacedData.ajax.reload();
                 }
             }
@@ -72,7 +88,7 @@ $(document).ready(function() {
                 method: "POST",
                 data: { replaced_id: replaced_id, btn_action: btn_action },
                 success: function(data) {
-                    refreshPartsDropdown();
+                    
                     replacedData.ajax.reload();
                 }
             });
@@ -95,34 +111,44 @@ $(document).ready(function() {
                     alert(data.error);
                     return;
                 }
-                refreshPartsDropdown();
+                
                 // Open the modal
                 $('#replacedModal').modal('show');
                 // Set the form fields with the returned data
                 $('#replacement_id').val(data.replacement_id);
                 $('#quantity').val(data.quantity);
     
-                // Set selected values for phone and part dropdowns
-                $('#phone').val(data.phone_pid);  // Set selected phone
-                $('#part').val(data.part_pid);    // Set selected part
+                // Set selected values for phone dropdown
+                $('#phone').val(data.phone_pid);
+
+                // Fetch available parts for the selected phone
+                $.ajax({
+                    url: "action.php",
+                    method: "POST",
+                    data: { action: 'getAvailableParts', phone_id: data.phone_pid, current_part_id: data.part_pid },
+                    success: function(partsData) {
+                        console.log("Parts Data:", partsData); // Debug log
+                        $('#part').html(partsData);
+                        // Set selected part
+                        $('#part').val(data.part_pid);
+                        console.log("Parts Default:", data.part_pid); // Debug log
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error fetching parts:", error); // Debug log
+                    }
+                });
     
                 // Update modal title and form action
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Replace");
                 $('#action').val("Edit");
                 $('#btn_action').val("updateReplaced");
                 $('.text-danger').remove(); // Remove error messages
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching replacement details:", error); // Debug log
             }
         });
     });
     
-    function refreshPartsDropdown() {
-        $.ajax({
-            url: "replaced.php",
-            method: "POST",
-            data: { action: 'getPartsDropdown' },
-            success: function(data) {
-                location.reload();
-            }
-        });
-    }
+    
 });

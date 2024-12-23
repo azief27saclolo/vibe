@@ -200,4 +200,8 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServiceAvailed
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServiceAvailed'){
     $inventory->deleteServiceAvailed();
 }
+
+if(!empty($_POST['action']) && $_POST['action'] == 'getAvailableParts') {
+    $inventory->getAvailableParts();
+}
 ?>

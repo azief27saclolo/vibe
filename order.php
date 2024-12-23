@@ -38,7 +38,8 @@ $inventory->checkLogin();
                                     <th>ID</th>      
 									<th>Product</th>	
 									<th>Total Item</th> 
-									<th>Customer</th> 									
+									<th>Customer</th>
+                                    <th>Date</th> <!-- New column for order date -->
                                     <th>Action</th>
                                 </tr></thead>
                             </table>
@@ -69,9 +70,10 @@ $inventory->checkLogin();
                                 </div>
                                 <div class="mb-3">
                                     <label>Total Item</label>
-                                    <div class="input-group">
-                                        <input type="text" name="sold" id="sold" class="form-control rounded-0" required />        
+                                    <div class="form-group">
+                                        <input type="number" name="sold" id="sold" class="form-control rounded-0" required />        
                                     </div>
+                             
                                 </div> 
                                 <div class="mb-3">
                                     <label>Customer Name</label>
