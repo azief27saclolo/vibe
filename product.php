@@ -132,6 +132,7 @@ $inventory->checkLogin();
                                         <option value="">Select Part</option>
                                         <?php echo $inventory->partsDropdownList();?>
                                     </select>
+                                    <div id="error"></div>
                                     <div id="selectedPartsContainer" class="mt-2"></div>
                                 </div>
                                 

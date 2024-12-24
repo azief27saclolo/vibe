@@ -418,7 +418,32 @@ class Inventory {
 		}
 		return $dropdownHTML;
 	}
-	public function addProduct() {		
+	public function addProduct() {	
+		$array = null;
+					//checking if the parts have enough stock
+					if (!empty($_POST['selected_parts'])) {
+						$array = $_POST['selected_parts'];
+						$zeroQuantityParts = []; // Initialize an array to collect parts with zero quantity
+					
+						if ($array != null) {
+							foreach ($array as $partId) {
+								$sqlcheck = "SELECT pname FROM ".$this->productTable."
+											 WHERE pid = ".$partId."
+											 AND quantity <= 0";
+								$result = mysqli_query($this->dbConnect, $sqlcheck);
+								$row = $result->fetch_assoc();
+								if ($row) {
+									$zeroQuantityParts[] = $row['pname']; // Add part name to the array
+								}
+							}
+					
+							if (!empty($zeroQuantityParts)) {
+								echo json_encode($zeroQuantityParts); // Convert the array to a JSON string before echoing
+								return;
+							}
+						}
+					}
+		
 		$sqlInsert = "
         SELECT * FROM ".$this->productTable."
 		WHERE pname = '".$_POST['pname']."'";		
@@ -443,6 +468,12 @@ class Inventory {
 						INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
 						VALUES ('".$productId."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
 					mysqli_query($this->dbConnect, $sqlInsertPart);
+
+					$sqlUpdate = "
+					UPDATE ".$this->productTable."
+					SET quantity = quantity - 1
+					WHERE pid = '".$partId."'";
+					mysqli_query($this->dbConnect, $sqlUpdate);
 				}
 			}
 			echo '1';
@@ -483,6 +514,8 @@ class Inventory {
 		echo json_encode($output);
 	}
 	public function updateProduct() {		
+
+
 		$sqlInsert = "
         SELECT * FROM ".$this->productTable."
 		WHERE pname = '".$_POST['pname']."' AND pid != '".$_POST['pid']."'";		
@@ -493,10 +526,50 @@ class Inventory {
 			echo '2';
 		}elseif(mysqli_num_rows($result) <= 0){
 				if($_POST['pid']) {	
+					$array = null;
+					//checking if the parts have enough stock
+					if (!empty($_POST['selected_parts'])) {
+						$array = $_POST['selected_parts'];
+						$zeroQuantityParts = []; // Initialize an array to collect parts with zero quantity
+					
+						if ($array != null) {
+							foreach ($array as $partId) {
+								$sqlcheck = "SELECT pname FROM ".$this->productTable."
+											 WHERE pid = ".$partId."
+											 AND quantity <= 0";
+								$result = mysqli_query($this->dbConnect, $sqlcheck);
+								$row = $result->fetch_assoc();
+								if ($row) {
+									$zeroQuantityParts[] = $row['pname']; // Add part name to the array
+								}
+							}
+					
+							if (!empty($zeroQuantityParts)) {
+								echo json_encode($zeroQuantityParts); // Convert the array to a JSON string before echoing
+								return;
+							}
+						}
+					}
+
 					$sqlUpdate = "UPDATE ".$this->productTable." 
-						SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
+					SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
 					mysqli_query($this->dbConnect, $sqlUpdate);
 
+					//adding 1 each quantity before deleting
+					$sqlgetparts = "SELECT part_pid FROM ".$this->replacedTable." WHERE phone_pid = '".$_POST["pid"]."'";
+					$result = mysqli_query($this->dbConnect, $sqlgetparts);
+					$array = $result->fetch_assoc();
+					if($array != null){
+						foreach ($array as $partId) {
+							$sqlUpdate = "
+							UPDATE ".$this->productTable."
+							SET quantity = quantity + 1
+							WHERE pid = '".$partId."'";
+							mysqli_query($this->dbConnect, $sqlUpdate);
+						}
+					}
+				
+					
 					// Remove existing replaced parts
 					$sqlDeleteParts = "DELETE FROM ".$this->replacedTable." WHERE phone_pid = '".$_POST["pid"]."'";
 					mysqli_query($this->dbConnect, $sqlDeleteParts);
@@ -508,15 +581,35 @@ class Inventory {
 								INSERT INTO ".$this->replacedTable."(phone_pid, part_pid, quantity) 
 								VALUES ('".$_POST["pid"]."', '".$partId."', '1')"; // Assuming quantity is 1 for each part
 							mysqli_query($this->dbConnect, $sqlInsertPart);
+
+							$sqlUpdate = "
+							UPDATE ".$this->productTable."
+							SET quantity = quantity - 1
+							WHERE pid = '".$partId."'";
+							mysqli_query($this->dbConnect, $sqlUpdate);
 						}
 					}
-
 					echo '1';
-				}	
-		}
-
+				}
+	        }	
+		
     }	 
 	public function deleteProduct(){
+
+		//adding 1 each quantity before deleting
+		$sqlgetparts = "SELECT part_pid FROM ".$this->replacedTable." WHERE phone_pid = '".$_POST["pid"]."'";
+		$result = mysqli_query($this->dbConnect, $sqlgetparts);
+		$array = $result->fetch_assoc();
+		if($array != null){
+			foreach ($array as $partId) {
+				$sqlUpdate = "
+				UPDATE ".$this->productTable."
+				SET quantity = quantity + 1
+				WHERE pid = '".$partId."'";
+				mysqli_query($this->dbConnect, $sqlUpdate);
+			}
+		}
+
 		$sqlQuery = "
 			DELETE FROM ".$this->productTable." 
 			WHERE pid = '".$_POST["pid"]."'";	

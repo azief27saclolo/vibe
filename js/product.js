@@ -92,12 +92,14 @@ $(document).ready(function() {
             method: "POST",
             data: formData,
             success: function(data) {
+                $flag = false;
                 if (data == 0) {
                     if ($('#pname').next('.text-danger').length === 0) {
                         $('#pname').after('<span class="text-danger">This product is already existed.</span>');
                     } else {
                         $('#pname').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
                     }
+                    $flag = true;
                 }  if(data == 1 ) {
                     $('#alert_message').text('Product Updated');
                     $('#alertModal').modal('show');
@@ -111,11 +113,22 @@ $(document).ready(function() {
                     
                     // Restore all values in dropdown
                     $('#categoryid').val('').trigger('change');
+                    $flag = true;
                 } if (data == 2) {
                     if ($('#selling_price').next('.text-danger').length === 0) {
                         $('#selling_price').after('<span class="text-danger">Selling Price must be above base price..</span>');
                     } else {
                         $('#selling_price').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
+                    }
+                    $flag = true;
+                }if(!$flag){
+                    var parts = JSON.parse(data);
+                    if ($('#error').next('.text-danger').length === 0) {
+                        $('#error').after('<span class="text-danger">Stock is 0 for the parts '+ parts.join(',') +'.</span>');
+                    } else {
+                        $('.text-danger').remove(); // Remove error messages
+                        $('#error').after('<span class="text-danger">Stock is 0 for the parts '+ parts.join(',') +'.</span>');
+                        $('#error').next('.text-danger').fadeOut(100).fadeIn(100).fadeOut(100).fadeIn(100);
                     }
                 }
 
