@@ -1127,7 +1127,7 @@ public function addOrder() {
 		}		
 	}
 	public function getInventoryDetails(){		
-		$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, 
+		$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, p.selling_price,p.base_price,
 						(SELECT SUM(s.quantity) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid) as recieved_quantity, 
 						(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid) as total_sell,
 						(SELECT COALESCE(SUM(rp.quantity), 0) FROM ".$this->replacedTable." as rp WHERE rp.part_pid = p.pid) as total_replaced
@@ -1143,11 +1143,22 @@ public function addOrder() {
 				$inventory['recieved_quantity'] = 0;
 			}
 			$totalSell = $inventory['total_sell'] + $inventory['total_replaced'];
+			$revenue = $totalSell * $inventory['selling_price'];
+			$based_price = $inventory['base_price'] * $totalSell;
+			if($totalSell > 0){
+				$income = $revenue - $based_price;
+			}else{
+				$income = 0;
+			}
 			$inventoryRow = array();
 			$inventoryRow[] = $i++;
 			$inventoryRow[] = "<div class='lh-1'><div>{$inventory['pname']}</div><div class='fw-bolder text-muted'</div></div>";
 			$inventoryRow[] = $inventory['product_quantity'];
 			$inventoryRow[] = $totalSell;
+			$inventoryRow[] = $inventory['base_price'];
+			$inventoryRow[] = $inventory['selling_price'];
+			$inventoryRow[] = $revenue;
+			$inventoryRow[] = $income;
 			$inventoryData[] = $inventoryRow;						
 		}
 		$output = array(
@@ -1615,6 +1626,56 @@ public function getServiceListDropdown() {
         echo $dropdownHTML;
     }
 
+    public function getIncomeData() {
+		$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, p.selling_price,p.base_price,
+						(SELECT SUM(s.quantity) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid) as recieved_quantity, 
+						(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid) as total_sell,
+						(SELECT COALESCE(SUM(rp.quantity), 0) FROM ".$this->replacedTable." as rp WHERE rp.part_pid = p.pid) as total_replaced
+					FROM ".$this->productTable." as p
+					GROUP BY p.pid"; // Group by product ID to sum quantities
+					
+		$result = mysqli_query($this->dbConnect, $sqlQuery);
+		$numRows = mysqli_num_rows($result);
+		$inventoryData = array();	
+		$i = 1;
+		$total_income_product = 0;
+		while( $inventory = mysqli_fetch_assoc($result) ) {	
+			if(!$inventory['recieved_quantity']) {
+				$inventory['recieved_quantity'] = 0;
+			}
+			$totalSell = $inventory['total_sell'] + $inventory['total_replaced'];
+			$revenue = $totalSell * $inventory['selling_price'];
+			$based_price = $inventory['base_price'] * $totalSell;
+			if($totalSell > 0){
+				$income = $revenue - $based_price;
+			}else{
+				$income = 0;
+			}
+			$total_income_product += $income;
+		}
+		$productIncome = $total_income_product;
+
+        $sqlServiceIncome = "
+            SELECT SUM(s.service_price) AS service_income
+            FROM ".$this->service_availedTable." sa
+            JOIN ".$this->servicesTable." s ON sa.service_id = s.service_id";
+        $resultService = mysqli_query($this->dbConnect, $sqlServiceIncome);
+        $serviceIncome = mysqli_fetch_assoc($resultService)['service_income'];
+		
+        $totalIncome = $productIncome + $serviceIncome;
+
+        $data = array(
+            "total_income" => $totalIncome,
+            "product_income" => $productIncome,
+            "service_income" => $serviceIncome
+        );
+
+        echo json_encode($data);
+		//================================================================================================================================================================
+		
+	//================================================================================================================================================================
+	
+    }
 }
 ?>
 

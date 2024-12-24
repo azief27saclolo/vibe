@@ -26,3 +26,37 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+.card_holder_top{
+    display: flex;
+    justify-content:flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.card_top{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 5px;
+    flex-wrap: wrap;
+}
+
+.green{
+    background-color: rgb(65, 165, 65);
+}
+
+.blue{
+    background-color: rgb(121, 121, 224);
+}
+
+.black{
+    color: rgb(0, 0, 0);
+    font-size: small;
+}
+
+.white{
+    color: rgb(255, 255, 255);
+    font-size: large;
+}

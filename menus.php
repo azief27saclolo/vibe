@@ -6,7 +6,7 @@
 		</button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="nav navbar-nav mx-auto">
-			<li class="nav-item"><a class="nav-link" href="revenue.php"><i class="fa-solid fa-money-bill"></i> Revenue</a></li>
+			
 			<li class="nav-item"><a class="nav-link" href="index.php"><i class="fas fa-home"></i> Home</a></li>
 			<li class="nav-item"><a class="nav-link" href="services.php"><i class="fas fa-cog"></i> Services</a></li>
 			<li class="nav-item"><a class="nav-link" href="customer.php"><i class="fas fa-users"></i> Customer</a></li>

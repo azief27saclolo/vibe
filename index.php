@@ -21,9 +21,23 @@ $inventory->checkLogin();
         <div class="col-md-12">
             <div class="card card-default rounded-0 shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Inventory</h3>
+                    <h3 class="card-title">Home</h3>
                 </div>
                 <div class="card-body">
+                    <div class="card_holder_top">
+                            <div class="card_top green">
+                                <p class="black">Total Income</p>
+                                <h4 class="white" id="total_income">0</h4>
+                            </div>
+                            <div class="card_top blue">
+                                <p class="black">Product Income</p>
+                                <h4 class="white" id="product_income">0</h4>
+                            </div>
+                            <div class="card_top blue">
+                                <p class="black">Service Income</p>
+                                <h4 class="white" id="service_income">0</h4>  
+                            </div>
+                        </div>
 					<div class="row">
 						<div class="col-sm-12">
 							<table id="inventoryDetails" class="table table-bordered table-striped">
@@ -33,6 +47,10 @@ $inventory->checkLogin();
 										<th>Product/Code</th>
 										<th>In Stock</th>
 										<th>Sold</th>
+                                        <th>Base Price</th>
+                                        <th>Selling Price</th>
+                                        <th>Revenue</th>
+                                        <th>Income</th>
 									</tr>
 							</thead>
                         </table>
