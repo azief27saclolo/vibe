@@ -205,7 +205,17 @@ if(!empty($_POST['action']) && $_POST['action'] == 'getAvailableParts') {
     $inventory->getAvailableParts();
 }
 
-if(!empty($_POST['action']) && $_POST['action'] == 'getIncomeData') {
-    $inventory->getIncomeData();
+if(!empty($_POST['action']) && $_POST['action'] == 'getIncomeDataAll') {
+    $inventory->getIncomeDataAll();
 }
+
+
+if(!empty($_POST['action']) && $_POST['action'] == 'getIncomeDataToday') {
+    $inventory->getIncomeDataToday();
+}
+
+if(!empty($_POST['action']) && $_POST['action'] == 'getMonthlyIncomeData') {
+    $inventory->getMonthlyIncomeData();
+}
+
 ?>

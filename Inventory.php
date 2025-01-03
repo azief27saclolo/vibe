@@ -3,19 +3,19 @@ class Inventory {
     private $host  = 'localhost';
     private $user  = 'root';
     private $password   = '';
-    private $database  = 'ims_db';   
-	private $userTable = 'ims_user';	
-    private $customerTable = 'ims_customer';
-	private $categoryTable = 'ims_category';
-	private $brandTable = 'ims_brand';
-	private $productTable = 'ims_product';
-	private $supplierTable = 'ims_supplier';
-	private $purchaseTable = 'ims_purchase';
+    private $database  = 'vibe_db';   
+	private $userTable = 'user';	
+    private $customerTable = 'customer';
+	private $categoryTable = 'category';
+	private $brandTable = 'brand';
+	private $productTable = 'product';
+	private $supplierTable = 'supplier';
+	private $purchaseTable = 'purchase';
 
 	private $servicesTable = 'services';
 
 	private $service_availedTable = 'service_availed';
-	private $orderTable = 'ims_order';
+	private $orderTable = 'orders';
 
 	private  $replacedTable = 'product_replacement_parts';
 
@@ -1462,7 +1462,7 @@ public function addOrder() {
 
 
     public function updateProductQuantity($productId, $quantity) {
-        $query = "UPDATE ims_product SET quantity = quantity - ? WHERE pid = ?";
+        $query = "UPDATE ".$this->productTable." SET quantity = quantity - ? WHERE pid = ?";
         $statement = $this->dbConnect->prepare($query);
         $statement->bind_param("ii", $quantity, $productId);
         $statement->execute();
@@ -1626,20 +1626,25 @@ public function getServiceListDropdown() {
         echo $dropdownHTML;
     }
 
-    public function getIncomeData() {
-		$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, p.selling_price,p.base_price,
-						(SELECT SUM(s.quantity) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid) as recieved_quantity, 
-						(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid) as total_sell,
-						(SELECT COALESCE(SUM(rp.quantity), 0) FROM ".$this->replacedTable." as rp WHERE rp.part_pid = p.pid) as total_replaced
+	//==
+	
+	public function getIncomeDataAll() {
+		$currentMonth = date('m'); // Get current month
+		$currentYear = date('Y'); // Get current year
+
+		$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, p.selling_price, p.base_price,
+						(SELECT SUM(s.quantity) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid ) as recieved_quantity, 
+						(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid ) as total_sell,
+						(SELECT COALESCE(SUM(rp.quantity), 0) FROM ".$this->replacedTable." as rp WHERE rp.part_pid = p.pid ) as total_replaced
 					FROM ".$this->productTable." as p
 					GROUP BY p.pid"; // Group by product ID to sum quantities
-					
+
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
-		$inventoryData = array();	
+		$inventoryData = array();    
 		$i = 1;
 		$total_income_product = 0;
-		while( $inventory = mysqli_fetch_assoc($result) ) {	
+		while( $inventory = mysqli_fetch_assoc($result) ) {    
 			if(!$inventory['recieved_quantity']) {
 				$inventory['recieved_quantity'] = 0;
 			}
@@ -1655,27 +1660,132 @@ public function getServiceListDropdown() {
 		}
 		$productIncome = $total_income_product;
 
-        $sqlServiceIncome = "
-            SELECT SUM(s.service_price) AS service_income
-            FROM ".$this->service_availedTable." sa
-            JOIN ".$this->servicesTable." s ON sa.service_id = s.service_id";
-        $resultService = mysqli_query($this->dbConnect, $sqlServiceIncome);
-        $serviceIncome = mysqli_fetch_assoc($resultService)['service_income'];
+		$sqlServiceIncome = "
+			SELECT SUM(s.service_price) AS service_income
+			FROM ".$this->service_availedTable." sa
+			JOIN ".$this->servicesTable." s ON sa.service_id = s.service_id
+			WHERE MONTH(sa.availed_date) = '$currentMonth' AND YEAR(sa.availed_date) = '$currentYear'";
+		$resultService = mysqli_query($this->dbConnect, $sqlServiceIncome);
+		$serviceIncome = mysqli_fetch_assoc($resultService)['service_income'];
 		
-        $totalIncome = $productIncome + $serviceIncome;
+		$totalIncome = $productIncome + $serviceIncome;
 
-        $data = array(
-            "total_income" => $totalIncome,
-            "product_income" => $productIncome,
-            "service_income" => $serviceIncome
-        );
+		$data = array(
+			"total_income" => $totalIncome,
+			"product_income" => $productIncome,
+			"service_income" => $serviceIncome
+		);
 
-        echo json_encode($data);
-		//================================================================================================================================================================
-		
-	//================================================================================================================================================================
+		echo json_encode($data);
+	}
+
 	
-    }
+
+		
+	public function getMonthlyIncomeData() {
+		$currentYear = date('Y'); // Get current year
+
+		$monthlyIncomeData = [];
+		for ($month = 1; $month <= 12; $month++) {
+			$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, p.selling_price, p.base_price,
+							(SELECT COALESCE(SUM(s.quantity), 0) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid AND MONTH(s.purchase_date) = '$month' AND YEAR(s.purchase_date) = '$currentYear') as recieved_quantity, 
+							(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid AND MONTH(r.order_date) = '$month' AND YEAR(r.order_date) = '$currentYear') as total_sell,
+							(SELECT COALESCE(SUM(rp.quantity), 0) FROM ".$this->replacedTable." as rp WHERE rp.part_pid = p.pid AND MONTH(rp.replacement_date) = '$month' AND YEAR(rp.replacement_date) = '$currentYear') as total_replaced
+						FROM ".$this->productTable." as p
+						GROUP BY p.pid"; // Group by product ID to sum quantities
+
+			$result = mysqli_query($this->dbConnect, $sqlQuery);
+			if (!$result) {
+				echo json_encode(['error' => mysqli_error($this->dbConnect)]);
+				return;
+			}
+
+			$total_income_product = 0;
+
+			while ($inventory = mysqli_fetch_assoc($result)) {
+				if (!$inventory['recieved_quantity']) {
+					$inventory['recieved_quantity'] = 0;
+				}
+				$totalSell = $inventory['total_sell'] + $inventory['total_replaced'];
+				$revenue = $totalSell * $inventory['selling_price'];
+				$based_price = $inventory['base_price'] * $totalSell;
+				$income = $totalSell > 0 ? $revenue - $based_price : 0;
+				$total_income_product += $income;
+			}
+			$productIncome = $total_income_product;
+
+			$sqlServiceIncome = "
+				SELECT COALESCE(SUM(s.service_price), 0) AS service_income
+				FROM ".$this->service_availedTable." sa
+				JOIN ".$this->servicesTable." s ON sa.service_id = s.service_id
+				WHERE MONTH(sa.availed_date) = '$month' AND YEAR(sa.availed_date) = '$currentYear'";
+			$resultService = mysqli_query($this->dbConnect, $sqlServiceIncome);
+			if (!$resultService) {
+				echo json_encode(['error' => mysqli_error($this->dbConnect)]);
+				return;
+			}
+			$serviceIncome = mysqli_fetch_assoc($resultService)['service_income'];
+
+			$totalIncome = $productIncome + $serviceIncome;
+
+			$monthlyIncomeData[] = [
+				"month" => $month,
+				"total_income" => $totalIncome,
+				"product_income" => $productIncome,
+				"service_income" => $serviceIncome
+			];
+		}
+
+		header('Content-Type: application/json'); // Ensure the response is JSON
+		echo json_encode($monthlyIncomeData);
+	}
+	
+	
+	public function getIncomeDataToday() {
+		$data = [];
+		for ($i = 0; $i < 7; $i++) {
+			$date = date('Y-m-d', strtotime("-$i days")); // Get the date for the last 7 days
+
+			$sqlQuery = "SELECT p.pid, p.pname, p.quantity as product_quantity, p.selling_price, p.base_price,
+							(SELECT COALESCE(SUM(s.quantity), 0) FROM ".$this->purchaseTable." as s WHERE s.product_id = p.pid AND DATE(s.purchase_date) = '$date') as recieved_quantity, 
+							(SELECT COALESCE(SUM(r.total_sell), 0) FROM ".$this->orderTable." as r WHERE r.product_id = p.pid AND DATE(r.order_date) = '$date') as total_sell,
+							(SELECT COALESCE(SUM(rp.quantity), 0) FROM ".$this->replacedTable." as rp WHERE rp.part_pid = p.pid AND DATE(rp.replacement_date) = '$date') as total_replaced
+						FROM ".$this->productTable." as p
+						GROUP BY p.pid"; // Group by product ID to sum quantities
+
+			$result = mysqli_query($this->dbConnect, $sqlQuery);
+			$total_income_product = 0;
+			while ($inventory = mysqli_fetch_assoc($result)) {
+				$recieved_quantity = $inventory['recieved_quantity'] ?? 0;
+				$totalSell = ($inventory['total_sell'] ?? 0) + ($inventory['total_replaced'] ?? 0);
+				$revenue = $totalSell * $inventory['selling_price'];
+				$based_price = $inventory['base_price'] * $totalSell;
+				$income = $totalSell > 0 ? $revenue - $based_price : 0;
+				$total_income_product += $income;
+			}
+			$productIncome = $total_income_product;
+
+			$sqlServiceIncome = "
+				SELECT COALESCE(SUM(s.service_price), 0) AS service_income
+				FROM ".$this->service_availedTable." sa
+				JOIN ".$this->servicesTable." s ON sa.service_id = s.service_id
+				WHERE DATE(sa.availed_date) = '$date'";
+			$resultService = mysqli_query($this->dbConnect, $sqlServiceIncome);
+			$serviceIncome = mysqli_fetch_assoc($resultService)['service_income'] ?? 0;
+
+			$totalIncome = $productIncome + $serviceIncome;
+
+			$data[] = [
+				"date" => $date,
+				"total_income" => $totalIncome,
+				"product_income" => $productIncome,
+				"service_income" => $serviceIncome
+			];
+		}
+
+		echo json_encode(array_reverse($data)); // Reverse the array to have the most recent date first
+	}
+
 }
 ?>
 

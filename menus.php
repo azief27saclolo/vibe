@@ -6,8 +6,8 @@
 		</button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="nav navbar-nav mx-auto">
-			
-			<li class="nav-item"><a class="nav-link" href="index.php"><i class="fas fa-home"></i> Home</a></li>
+			<li class="nav-item"><a class="nav-link" href="statistic.php"><i class="fas fa-dollar-sign"></i> Statistics</a></li>
+			<li class="nav-item"><a class="nav-link" href="index.php"><i class="fas fa-home"></i> Inventory</a></li>
 			<li class="nav-item"><a class="nav-link" href="services.php"><i class="fas fa-cog"></i> Services</a></li>
 			<li class="nav-item"><a class="nav-link" href="customer.php"><i class="fas fa-users"></i> Customer</a></li>
 			<li class="nav-item"><a class="nav-link" href="category.php"><i class="fas fa-th-list"></i> Category</a></li>
