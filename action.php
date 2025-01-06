@@ -172,9 +172,11 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'deleteServices'){
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'updateServices'){
 	$inventory->updateServices();
 }
+
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getServicesDetails'){
 	$inventory->getServicesDetails();
 }
+
 if(!empty($_POST['action']) && $_POST['action'] == 'getServiceList') {
     $inventory->getServiceListDropdown();
 }

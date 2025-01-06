@@ -30,6 +30,7 @@ $(document).ready(function() {
         $('#action').val("Add");
         $('#btn_action').val("addServices");
         $('.text-danger').remove();
+        $('#current_image').hide(); // Hide the current image preview
     });
 
     $(document).on('submit', '#servicesForm', function(event) {
@@ -39,11 +40,13 @@ $(document).ready(function() {
         setTimeout(function() {
             $('#action').attr('disabled', false);
         }, 1000);
-        var formData = $(this).serialize();
+        var formData = new FormData(this); // Use FormData to handle file uploads
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
+            contentType: false, // Required for FormData
+            processData: false, // Required for FormData
             success: function(data) {
                 if (data <= 0) {
                     if ($('#service_name').next('.text-danger').length === 0) {
@@ -99,6 +102,12 @@ $(document).ready(function() {
                 $('#servicesModal').modal('show');
                 $('#service_name').val(data.service_name);
                 $('#service_price').val(data.service_price);
+                $('#existing_image').val(data.image);
+                if (data.image) {
+                    $('#current_image').attr('src', data.image).show();
+                } else {
+                    $('#current_image').hide();
+                }
                 $('.modal-title').html("<i class='fa fa-edit'></i> Update Service");
                 $('#services_id').val(services_id);
                 $('.text-danger').remove();

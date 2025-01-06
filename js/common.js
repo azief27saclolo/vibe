@@ -88,9 +88,7 @@ $(document).ready(function() {
                     },
                     plugins: [ChartDataLabels] // Register the plugin
                 });
-            } else {
-                console.error('Element with ID "incomeChartLast7Days" not found.');
-            }
+            } 
         },
         error: function(xhr, status, error) {
             console.error('Error fetching income data:', error);
@@ -124,7 +122,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 try {
-                    console.log(data); // Log the server response
+                    
                     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
                     const currentYear = new Date().getFullYear(); // Get the current year
                     const labels = data.map(item => `${monthNames[item.month - 1]} ${currentYear}`);
@@ -185,8 +183,6 @@ $(document).ready(function() {
                         plugins: [ChartDataLabels] // Register the plugin
                     });
                 } catch (error) {
-                    console.error('Error parsing income data:', error);
-                    console.log('Response data:', data);
                 }
             },
             error: function(xhr, status, error) {

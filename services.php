@@ -55,6 +55,7 @@ $inventory->checkLogin();
                             <table id="servicesList" class="table table-bordered table-striped">
                                 <thead><tr>
                                     <th>ID</th>      
+                                    <th>Service Image</th>	
 									<th>Service Name</th>	
 									<th>Service Price</th>						
                                     <th>Action</th>
@@ -74,20 +75,26 @@ $inventory->checkLogin();
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="post" id="servicesForm">
+                            <form method="post" id="servicesForm" enctype="multipart/form-data">
                                 <input type="hidden" name="btn_action" id="btn_action" />
                                 <input type="hidden" name="services_id" id="services_id" />
+                                <input type="hidden" name="existing_image" id="existing_image" />
                                 
 								<div class="form-group">
                                     <label>Service Name </label>
                                     <input type="text" name="service_name" id="service_name" class="form-control rounded-0 " required />
                                 </div>
-
+                                <div class="form-group">
+                                    <label>Service Image</label>
+                                    <input type="file" name="service_image" id="service_image" class="form-control rounded-0" accept="image/*" />
+                                    <img id="current_image" src="" alt="Current Image" style="max-width: 100px; max-height: 100px; display: none;" />
+                                </div>
+                                
                                 <div class="form-group">
                                     <label>Service Price</span></label>
                                     <input type="number" name="service_price" id="service_price" class="form-control rounded-0"   required/>
-
                                 </div>
+
 
                             </form>
                         </div>

@@ -382,6 +382,7 @@ class Inventory {
 			$productRow[] = $increment++;
 			$productRow[] = $product['category_name'];
 			$productRow[] = $product['bname'];
+			$productRow[] = '<img src="img/'.$product['image'].'" alt="'.$product['pname'].'" style="width:50px;height:50px;">';
 			$productRow[] = $product['pname'];	
 			$productRow[] = $product["quantity"];
 			$productRow[] = $product["base_price"];
@@ -444,6 +445,15 @@ class Inventory {
 						}
 					}
 		
+		if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] == 0) {
+			$imageName = $_FILES['product_image']['name'];
+			$imageTmpName = $_FILES['product_image']['tmp_name'];
+			$imageDestination = 'img/' . $imageName;
+			move_uploaded_file($imageTmpName, $imageDestination);
+		} else {
+			$imageName = '';
+		}
+
 		$sqlInsert = "
         SELECT * FROM ".$this->productTable."
 		WHERE pname = '".$_POST['pname']."'";		
@@ -456,8 +466,8 @@ class Inventory {
 		}elseif(mysqli_num_rows($result) <= 0){
 
 			$sqlInsert = "
-				INSERT INTO ".$this->productTable."(categoryid, brandid, pname, description, quantity, base_price, selling_price, minimum_order, supplier) 
-				VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', 1, '".$_POST['supplierid']."')";		
+				INSERT INTO ".$this->productTable."(categoryid, brandid, pname, description, quantity, base_price, selling_price,image, minimum_order, supplier) 
+				VALUES ('".$_POST["categoryid"]."', '".$_POST['brandid']."', '".$_POST['pname']."', '".$_POST['description']."', '".$_POST['quantity']."', '".$_POST['base_price']."', '".$_POST['selling_price']."', '".$imageName."', 1, '".$_POST['supplierid']."')";		
 			mysqli_query($this->dbConnect, $sqlInsert);
 			$productId = mysqli_insert_id($this->dbConnect); // Get the last inserted product ID
 		
@@ -490,11 +500,13 @@ class Inventory {
 			$output['categoryid'] = $product['categoryid'];
 			$output['brandid'] = $product['brandid'];
 			$output["brand_select_box"] = $this->getCategoryBrand($product['categoryid']);
+			$output[] = '<img src="img/'.$product['image'].'" alt="'.$product['pname'].'" style="width:50px;height:50px;">';
 			$output['pname'] = $product['pname'];
 			$output['description'] = $product['description'];
 			$output['quantity'] = $product['quantity'];
 			$output['base_price'] = $product['base_price'];
 			$output['selling_price'] = $product['selling_price'];
+			$output['image'] = $product['image'];
 			$output['supplier'] = $product['supplier'];
 		}
 
@@ -551,8 +563,17 @@ class Inventory {
 						}
 					}
 
+					if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] == 0) {
+						$imageName = $_FILES['product_image']['name'];
+						$imageTmpName = $_FILES['product_image']['tmp_name'];
+						$imageDestination = 'img/' . $imageName;
+						move_uploaded_file($imageTmpName, $imageDestination);
+					} else {
+						$imageName = $_POST['existing_image'];
+					}
+
 					$sqlUpdate = "UPDATE ".$this->productTable." 
-					SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', pname='".$_POST['pname']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
+					SET categoryid = '".$_POST['categoryid']."', brandid='".$_POST['brandid']."', image='".$imageName."', pname='".$_POST['pname']."', description='".$_POST['description']."', quantity='".$_POST['quantity']."',  base_price='".$_POST['base_price']."',  selling_price='".$_POST['selling_price']."', supplier='".$_POST['supplierid']."' WHERE pid = '".$_POST["pid"]."'";			
 					mysqli_query($this->dbConnect, $sqlUpdate);
 
 					//adding 1 each quantity before deleting
@@ -1391,30 +1412,35 @@ public function addOrder() {
 	//SERVICES
 
 	public function addServices() {
-		
-		if($_POST['service_name'] && $_POST['service_price']){
-			$sqlInsert = "
-				SELECT * FROM ".$this->servicesTable." WHERE service_name = '".$_POST['service_name']."'";		
-			$result = mysqli_query($this->dbConnect, $sqlInsert);
-			
-			if(mysqli_num_rows($result) > 0){
-				echo '0';
-			}else{
-				
-				$sqlInsert = "
-				INSERT INTO ".$this->servicesTable."(service_name, service_price) 
-				VALUES ('".$_POST['service_name']."', '".$_POST['service_price']."')";		
-				$success = mysqli_query($this->dbConnect, $sqlInsert);
-				if($success) {
-					        echo '1';
-					    } else {
-					        echo '0';
-					    }
-							
-				}
-		}
+    if($_POST['service_name'] && $_POST['service_price']){
+        if (isset($_FILES['service_image']) && $_FILES['service_image']['error'] == 0) {
+            $imageName = $_FILES['service_image']['name'];
+            $imageTmpName = $_FILES['service_image']['tmp_name'];
+            $imageDestination = 'img/' . $imageName;
+            move_uploaded_file($imageTmpName, $imageDestination);
+        } else {
+            $imageName = '';
+        }
 
-	}
+        $sqlInsert = "
+            SELECT * FROM ".$this->servicesTable." WHERE service_name = '".$_POST['service_name']."'";        
+        $result = mysqli_query($this->dbConnect, $sqlInsert);
+        
+        if(mysqli_num_rows($result) > 0){
+            echo '0';
+        } else {
+            $sqlInsert = "
+            INSERT INTO ".$this->servicesTable."(service_name, service_price, image) 
+            VALUES ('".$_POST['service_name']."', '".$_POST['service_price']."', '".$imageName."')";        
+            $success = mysqli_query($this->dbConnect, $sqlInsert);
+            if($success) {
+                echo '1';
+            } else {
+                echo '0';
+            }
+        }
+    }
+}
 
 	public function listServices() {
 		$sqlQuery = "SELECT * FROM ".$this->servicesTable; 
@@ -1437,6 +1463,7 @@ public function addOrder() {
 		while ($service = mysqli_fetch_assoc($result)) {
 			$serviceRow = array();
 			$serviceRow[] = $intermediate++;
+			$serviceRow[] = '<img src="img/'.$service['image'].'" alt="'.$service['service_name'].'" style="width:50px;height:50px;">';
 			$serviceRow[] = $service['service_name'];
 			$serviceRow[] = $service['service_price'];
 			$serviceRow[] = '<div class="btn-group btn-group-sm"><button type="button" name="update" id="'.$service["service_id"].'" class="btn btn-primary btn-sm rounded-0 update" title="Update"><i class="fa fa-edit"></i></button><button type="button" name="delete" id="'.$service["service_id"].'" class="btn btn-danger btn-sm rounded-0 delete" title="Delete"><i class="fa fa-trash"></i></button></div>';
@@ -1474,36 +1501,43 @@ public function addOrder() {
             WHERE service_id = '".$_POST["services_id"]."'";
         $result = mysqli_query($this->dbConnect, $sqlQuery);    
         $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $row['image'] = 'img/' . $row['image'];
         echo json_encode($row);
     }
 
     public function updateServices() {
-        if($_POST['services_id']) {    
-			$sqlInsert = "
-				SELECT * FROM ".$this->servicesTable." WHERE service_name = '".$_POST['service_name']."'
-				AND service_id != '".$_POST['services_id']."'";   	
-			$result = mysqli_query($this->dbConnect, $sqlInsert);
-			
-			if(mysqli_num_rows($result) > 0){
-				echo '0';
-			}else{
-				
-				$sqlUpdate = "
-                UPDATE ".$this->servicesTable." 
-                SET service_name = '".$_POST['service_name']."', service_price = '".$_POST['service_price']."' 
-                WHERE service_id = '".$_POST['services_id']."'";        
-				$success =  mysqli_query($this->dbConnect, $sqlUpdate);    
-				
-				if($success) {
-					        echo '1';
-					    } else {
-					        echo '0';
-					    }
-							
-				}
-        }    
-    }
+    if($_POST['services_id']) {
+        if (isset($_FILES['service_image']) && $_FILES['service_image']['error'] == 0) {
+            $imageName = $_FILES['service_image']['name'];
+            $imageTmpName = $_FILES['service_image']['tmp_name'];
+            $imageDestination = 'img/' . $imageName;
+            move_uploaded_file($imageTmpName, $imageDestination);
+        } else {
+            $imageName = $_POST['existing_image'];
+        }
 
+        $sqlInsert = "
+            SELECT * FROM ".$this->servicesTable." WHERE service_name = '".$_POST['service_name']."'
+            AND service_id != '".$_POST['services_id']."'";        
+        $result = mysqli_query($this->dbConnect, $sqlInsert);
+        
+        if(mysqli_num_rows($result) > 0){
+            echo '0';
+        } else {
+            $sqlUpdate = "
+            UPDATE ".$this->servicesTable." 
+            SET service_name = '".$_POST['service_name']."', service_price = '".$_POST['service_price']."', image = '".$imageName."' 
+            WHERE service_id = '".$_POST['services_id']."'";        
+            $success =  mysqli_query($this->dbConnect, $sqlUpdate);    
+            
+            if($success) {
+                echo '1';
+            } else {
+                echo '0';
+            }
+        }
+    }
+}
 
 	//service availed
 

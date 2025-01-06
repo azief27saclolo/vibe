@@ -55,7 +55,8 @@ $inventory->checkLogin();
                                 <thead><tr>
                                     <th>ID</th>      
 									<th>Category</th>	
-									<th>Brand Name</th>									
+									<th>Brand Name</th>	
+                                    <th>Product Image</th>								
                                     <th>Product Name</th>
                                     <th>Quantity</th>
                                     <th>Base Price</th>
@@ -79,9 +80,10 @@ $inventory->checkLogin();
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="post" id="productForm">
+                            <form method="post" id="productForm" enctype="multipart/form-data">
                                 <input type="hidden" name="pid" id="pid" />
                                 <input type="hidden" name="btn_action" id="btn_action" />
+                                <input type="hidden" name="existing_image" id="existing_image" />
                                 <div class="form-group">
                                     <label>Select Category</label>
                                     <select name="categoryid" id="categoryid" class="form-select rounded-0" required>
@@ -97,6 +99,11 @@ $inventory->checkLogin();
                                     </select>
                                 </div>
                                 <div class="form-group">
+                                    <label>Product Image</label>
+                                    <input type="file" name="product_image" id="product_image" class="form-control rounded-0" accept="image/*" />
+                                    <img id="current_image" src="" alt="Current Image" style="max-width: 100px; max-height: 100px; display: none;" />
+                                </div>
+                                <div class="form-group">
                                     <label>Product Name</label>
                                     <input type="text" name="pname" id="pname" class="form-control rounded-0" required />
                                 </div>
@@ -107,7 +114,7 @@ $inventory->checkLogin();
                                 <div class="form-group">
                                     <label>Product Quantity</label>
                                     <div class="input-group">
-                                        <input type="text" name="quantity" id="quantity" class="form-control rounded-0"     " /> 
+                                        <input type="text" name="quantity" id="quantity" class="form-control rounded-0"/> 
                                     </div>
                                 </div>
                                 <div class="form-group">

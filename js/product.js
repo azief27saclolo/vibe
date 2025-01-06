@@ -81,16 +81,18 @@ $(document).ready(function() {
         setTimeout(function() {
             $('#action').attr('disabled', false);
         }, 1000);
-        var formData = $(this).serializeArray();
+        var formData = new FormData(this); // Use FormData to handle file uploads
         // Collect selected parts
         $('.selected-part-button').each(function() {
-            formData.push({ name: 'selected_parts[]', value: $(this).data('part-id') });
+            formData.append('selected_parts[]', $(this).data('part-id'));
         });
 
         $.ajax({
             url: "action.php",
             method: "POST",
             data: formData,
+            contentType: false, // Required for FormData
+            processData: false, // Required for FormData
             success: function(data) {
                 $flag = false;
                 if (data == 0) {
@@ -170,6 +172,12 @@ $(document).ready(function() {
                 $('#base_price').val(data.base_price);
                 $('#selling_price').val(data.selling_price);
                 $('#supplierid').val(data.supplier);
+                $('#existing_image').val(data.image);
+                if (data.image) {
+                    $('#current_image').attr('src', 'img/' + data.image).show();
+                } else {
+                    $('#current_image').hide();
+                }
                 $('.modal-title').html("<i class='fa fa-edit'></i> Edit Product");
                 $('#pid').val(pid);
                 $('#action').val("Edit");
