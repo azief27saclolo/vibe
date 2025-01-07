@@ -1278,11 +1278,11 @@ public function addOrder() {
 		$result = mysqli_query($this->dbConnect, $sqlQuery);
 		$numRows = mysqli_num_rows($result);
 		$replacedData = array();
-	
+		$num = 1;
 		while ($purchase = mysqli_fetch_assoc($result)) {
 			// Format each row based on the fields in your table
 			$replacedRow = array();
-			$replacedRow[] = $purchase['replacement_id']; // Replacement ID
+			$replacedRow[] = $num; // Replacement ID
 			$replacedRow[] = $purchase['phone_name'];    // Phone name
 			$replacedRow[] = $purchase['part_name'];     // Part name
 			$replacedRow[] = $purchase['quantity'];      // Quantity of parts replaced
@@ -1296,7 +1296,7 @@ public function addOrder() {
 									 <i class="fa fa-trash"></i>
 								 </button>
 							  </div>'; // Action buttons
-		
+			$num++;
 			$replacedData[] = $replacedRow;
 		}
 	
